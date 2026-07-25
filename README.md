@@ -13,6 +13,32 @@
 
 ---
 
+## 真实例子 · 改写前 vs 改写后
+
+同一主题：**用约 200 字评价「卡卡西」这个 skill 本身。**  
+**改写前** = 普通助手腔说明文（未过人格包）。  
+**改写后** = 本仓库 `examples/persona-luxun` 装成的 **鲁迅 demo 人格** 实跑产物（`deliver_ok=true`，汉字 182，身份闸过、机检过、Judge 过；A 保真 0.74 / B brief 0.91）。
+
+### 改写前（普通助手腔）
+
+> 卡卡西是一个很有用的 AI 写作技能。你可以把喜欢的文章风格做成人格包，以后写稿时直接调用，不用每次都把原文贴进对话框。它还提供机器检查和回执，方便确认稿子有没有跑偏。适合需要长期保持固定文风的创作者和团队使用。整体流程清晰，安装一次就能反复写，比普通网页仿写更省事，也更可控。
+
+### 改写后（鲁迅 demo 人格 · 实跑）
+
+> 开源工具卡卡西，说是能装文风人格包，再按包写稿，并出验收回执。装一次人格，往后便可反复调用，不必次次从零捏腔调。
+>
+> 机器闸卡住格式与禁区，回执把过与不过写明白，亦可复核；比起网页上随口仿写，这里多了一道硬验收。
+>
+> 只会把原文贴进对话框里聊的，往往聊着便跑腔，热闹一阵就散。空口学腔，终究难交差。
+>
+> 这里却把人格钉成包，写完还有闸与单可查。冷眼看去，热闹的是仿，认真的是验收，后者才算把「像不像」从嘴上搬到纸面上，少些口头空热闹。
+
+原文档：[`examples/readme-demo/before-plain.md`](examples/readme-demo/before-plain.md) · [`examples/readme-demo/after-luxun.md`](examples/readme-demo/after-luxun.md) · 回执摘要 [`examples/readme-demo/RECEIPT.summary.md`](examples/readme-demo/RECEIPT.summary.md)
+
+> 学的是**笔迹**，不是身份壳。禁止把在世真人商务口吻当「本人」冒充。
+
+---
+
 ## 和网页仿写差在哪
 
 | 网页 AI | 卡卡西 |
@@ -102,6 +128,7 @@ W3/W5 默认页内 LLM；W6 出回执成功时**自动拷一份正文到桌面**
 - `examples/persona-laocai`
 - `examples/soseki-wagahai`
 - `examples/persona-luxun`
+- `examples/readme-demo` — 上方 README 前后对比的落盘稿
 
 ---
 
