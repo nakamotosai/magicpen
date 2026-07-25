@@ -11,6 +11,14 @@ Learn the *handwriting*, not the *identity*. Style ≠ identity. Install once, W
 
 > 中文: [README.md](README.md)
 
+### Why “kakashi”
+
+The name nods to **Hatake Kakashi** from *Naruto* — the **Copy Ninja**, known for copying others’ techniques after seeing them once.
+
+Here the metaphor is the same, applied to writing: **install someone’s style as a persona pack, then write with that pack again and again**. You copy *handwriting and rhythm*, not identity. Gates + a receipt check the draft; it is not “paste into chat and freestyle once.”
+
+This project is independent open source and **not affiliated with the official franchise**. “Kakashi / Copy Ninja” is a nickname and metaphor only — no trademark claim, no official endorsement.
+
 ## Live example · before vs after
 
 Same brief (~200 Chinese characters): **review the kakashi skill itself.**  
