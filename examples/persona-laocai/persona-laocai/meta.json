@@ -1,0 +1,9 @@
+{
+  "id": "persona-laocai",
+  "title": "老蔡 · 假装在东京笔迹",
+  "sample_source": "用户提供原创范文（富士山辟谣）",
+  "sample_han": 1635,
+  "layout_fingerprint": "high blank-line density; ~1.6 sent/para; ~52% single-sent paras",
+  "engine": "kakashi",
+  "rights": "user_own_text"
+}

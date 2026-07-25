@@ -1,0 +1,15 @@
+{
+  "id": "persona-soseki-wagahai",
+  "title": "夏目漱石《我是猫》中文自译肌理",
+  "source_work": "吾輩は猫である",
+  "source_author": "夏目漱石",
+  "source_lang": "ja_public_domain_aozora",
+  "sample_lang": "zh_self_translation_for_style",
+  "rights_note": "日文原作公版（青空）。中文为风格对齐自译，非商业全译本镜像；经典中译不全文入库。",
+  "sample_han": 1849,
+  "cut_target": 2000,
+  "engine": "kakashi",
+  "rules": "rules.md",
+  "not_cosplay": true,
+  "dual_ssot_note": "学笔迹与旁观讽刺结构，不扮演「我是漱石本人」免责腔"
+}

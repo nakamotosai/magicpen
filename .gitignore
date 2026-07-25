@@ -1,0 +1,34 @@
+# runtime / local only
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+Thumbs.db
+*.prev.*
+.venv/
+venv/
+
+# console session garbage (never ship)
+console/runs/
+console/**/state.json
+console/**/*.bak
+
+# demo run artifacts (local smoke; not product path)
+examples/**/runs/
+
+# research dumps (local only; not product path)
+archive/
+holdouts/
+
+# editor / OS
+.idea/
+.vscode/
+*.swp
+*~
+
+# accidental secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>卡卡西</title>
+  <link rel="stylesheet" href="/styles.css?v=desktop-deliver-20260725" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">卡</span>
+        <strong class="brand-title">卡卡西</strong>
+      </div>
+
+      <div class="fmt-seg" id="modeSeg" role="group" aria-label="模式">
+        <button type="button" data-mode="install">创建人格</button>
+        <button type="button" data-mode="write" class="active">写稿</button>
+      </div>
+
+      <div class="persona-wrap" id="personaWrap">
+        <select id="personaSel" title="写稿时用的人格包"></select>
+      </div>
+
+      <div class="top-actions">
+        <button type="button" class="ghost" id="btnNewSession">新会话</button>
+        <button type="button" class="primary" id="btnRunStep">跑本步</button>
+      </div>
+
+      <div class="top-status">
+        <span class="dot" id="statusDot"></span>
+        <span class="serial-msg" id="serialMsg">就绪</span>
+        <span id="statusText" class="sr-only">…</span>
+        <button type="button" class="ghost icon-btn" id="btnRefresh" title="刷新">↻</button>
+        <button type="button" class="ghost icon-btn" id="btnRefreshPersonas" title="刷新人格库" hidden>↻库</button>
+      </div>
+    </header>
+
+    <!-- 精简流水线：只保留步骤珠 + 一句当前位置 -->
+    <section class="pipeline-map" id="pipelineMap" aria-label="步骤">
+      <div class="pipe-line">
+        <div class="pipe-track" id="pipeTrack"></div>
+        <div class="pipe-now" id="pipeMeta"></div>
+      </div>
+    </section>
+
+    <div id="runToast" class="run-toast" hidden aria-live="polite">
+      <div class="run-toast-card">
+        <div class="run-toast-row">
+          <div class="run-toast-spin"></div>
+          <div class="run-toast-text">
+            <div class="run-toast-title" id="runToastTitle">正在运行…</div>
+            <div class="run-toast-sub" id="runToastSub">后台跑，页面可点</div>
+          </div>
+          <div class="run-toast-pct" id="runToastPct">0%</div>
+        </div>
+        <div class="run-toast-track"><div class="run-toast-fill" id="runToastFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="main">
+      <nav class="steps" id="stepNav" aria-label="步骤"></nav>
+      <div class="content-wrap">
+        <div class="content" id="content"></div>
+        <div class="footer-bar">
+          <div>
+            <button type="button" id="btnApprove">确认过闸 →</button>
+            <button type="button" id="btnReveal" class="ghost" title="高级：打开库内 runs 目录">库内文件夹</button>
+            <label class="chk footer-chk" id="gatesOnlyWrap" title="跳过评分分身，回执标降级">
+              <input type="checkbox" id="chkGatesOnly" />
+              <span class="chk-text"><span class="chk-main">只跑机器硬闸</span></span>
+            </label>
+            <span id="footerHint" class="hint"></span>
+          </div>
+          <div class="row">
+            <button type="button" class="primary" id="btnRunStep2">跑本步</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/app.js?v=desktop-deliver-20260725"></script>
+</body>
+</html>

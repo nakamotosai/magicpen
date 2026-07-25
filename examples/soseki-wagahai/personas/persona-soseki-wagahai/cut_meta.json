@@ -1,0 +1,11 @@
+{
+  "source": "C:\\Users\\sai\\.claude\\skills\\kakashi\\examples\\soseki-wagahai\\raw\\wagahai_zh_selftrans.md",
+  "strategy": "head",
+  "target": 2000,
+  "han": 1849,
+  "skip_han": 0,
+  "source_han": 2460,
+  "para_count": 13,
+  "ends_on_paragraph": true,
+  "boundary": "complete_paragraph"
+}
