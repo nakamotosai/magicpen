@@ -131,12 +131,25 @@ W3/W5 默认页内 LLM；W6 出回执成功时**自动拷一份正文到桌面**
 
 ---
 
-## Demo
+## 预设 Demo（装完就能写）
 
-- `examples/persona-laocai`
-- `examples/soseki-wagahai`
-- `examples/persona-luxun`
-- `examples/readme-demo` — 上方 README 前后对比的落盘稿
+仓库自带 **三套** 可直接用的人格包样例（在 `examples/`）。装到本机库后，控制台下拉和 `--persona` 都能点名：
+
+| 本机 id | 显示名 | 范文 | 路径 |
+|---------|--------|------|------|
+| `laocai` | 老蔡 | 口语空行指纹 | `examples/persona-laocai/` |
+| `luxun` | 鲁迅 · 藤野先生 | 《藤野先生》（公有领域） | `examples/persona-luxun/` |
+| `soseki` | 夏目漱石·我是猫肌理 | 长段冷嘲 | `examples/soseki-wagahai/` |
+
+```bash
+# 一键装进 ~/.claude/kakashi/personas/（已存在则跳过；--force 覆盖样本不删 runs）
+pythonw scripts/seed_demos.py
+
+# 用鲁迅·藤野先生直接写
+pythonw scripts/run_write.py --persona luxun --brief BRIEF.md --stage prepare
+```
+
+`examples/readme-demo/` 是 README 前后对比的落盘稿，不是第四套人格。
 
 ---
 

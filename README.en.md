@@ -93,6 +93,21 @@ Same facades as the skill. On successful finalize, a copy of the draft is placed
 | `KAKASHI_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL` | Base URL (default `http://127.0.0.1:8317`) |
 | `KAKASHI_LLM_MODEL` | Model (default `grok-4.5`) |
 
+## Built-in demos (ready after seed)
+
+Three persona packs ship under `examples/`. Seed into the local lib, then write:
+
+| local id | display | source |
+|----------|---------|--------|
+| `laocai` | 老蔡 | `examples/persona-laocai/` |
+| `luxun` | 鲁迅 · 藤野先生 (*Mr. Fujino*) | `examples/persona-luxun/` |
+| `soseki` | 夏目漱石·我是猫肌理 | `examples/soseki-wagahai/` |
+
+```bash
+pythonw scripts/seed_demos.py
+pythonw scripts/run_write.py --persona luxun --brief BRIEF.md --stage prepare
+```
+
 ## Contract
 
 Full contract: [SKILL.md](SKILL.md).

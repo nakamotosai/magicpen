@@ -85,7 +85,9 @@ pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage finalize 
   runs/rN/ draft RECEIPT GATES JUDGE_* …
 ```
 
-skill 内 `examples/` 仅 demo（≤3：laocai / soseki / luxun）。研究堆在 `archive/`，**不进默认路径**。
+skill 内 `examples/` 仅 demo（≤3：`laocai` / `luxun`《藤野先生》/ `soseki`）。  
+`pythonw scripts/seed_demos.py` 装进 `~/.claude/kakashi/personas/` 后可直接 `--persona luxun` 写稿。  
+研究堆在 `archive/`，**不进默认路径**。
 
 ## 本机控制台（人手步进 · 与 skill 同合同）
 
