@@ -1,35 +1,45 @@
-# 神笔 · magicpen · 神笔
+<div align="center">
 
-**可安装的文风产线 + 人格包。**  
-学笔迹，不学身份。**风格 ≠ 身份**。Install 一次，Write 多次；交稿要有 `draft` + `RECEIPT`。
+**🌐 Made by [Sai](https://saaaai.com) · [saaaai.com](https://saaaai.com)** — AI workflow · one homepage
+
+**[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md)**
+
+</div>
+
+<p align="center">
+  <img src="assets/readme/hero.svg" alt="magicpen · 神笔 — installable style pipeline + persona packs" width="100%">
+</p>
+
+# magicpen · 神笔 · 神笔
+
+**Installable style pipeline + persona packs.**  
+Learn the *handwriting*, not the *identity*. Style ≠ identity. Install once, Write many times; delivery needs `draft` + `RECEIPT`.
 
 | | |
 |--|--|
-| 中文 | **神笔** |
-| skill | **`magicpen`** |
-| 日文 | **神笔** |
+| Chinese brand | **神笔** |
+| skill id | **`magicpen`** |
+| Japanese | **神笔** |
 
-> English: [README.en.md](README.en.md)
+### Why “magicpen”
 
-### 为什么叫「神笔」
+The name comes from **Ma Liang and his magic brush** (神笔马良) — with a magic pen, anything you draw becomes real. Applied to writing: **install someone’s style as a persona pack, then write with that pack again and again**. You copy *handwriting and rhythm*, not identity. Gates + a receipt check the draft; it is not “paste into chat and freestyle once.”
 
-名字取自**神笔马良**——马良得了支神笔，画什么成什么。写作借用这个意象：**装一份别人的文风人格包，往后落笔就「画什么成什么」**——克隆的是笔迹与节奏，不是去当那个人。装一次，反复用；写完还有闸和回执验收，而不是对话框里随口仿一句就算了。
-
-本项目是独立开源工具；「神笔」取「写什么成什么」的寓意，不涉及原故事人物或任何商标。
+This project is an independent open-source tool. “magicpen / 神笔” borrows the meaning of “write anything, and it takes shape”; it involves no story characters, trademarks, or official endorsements.
 
 ---
 
-## 真实例子 · 改写前 vs 改写后
+## Live example · before vs after
 
-同一主题：**用约 200 字评价「神笔」这个 skill 本身。**  
-**改写前** = 普通助手腔说明文（未过人格包）。  
-**改写后** = 本仓库 `examples/persona-luxun` 装成的 **鲁迅 demo 人格** 实跑产物（`deliver_ok=true`，汉字 182，身份闸过、机检过、Judge 过；A 保真 0.74 / B brief 0.91）。
+Same brief (~200 Chinese characters): **review the magicpen skill itself.**  
+**Before** = generic assistant prose (no persona).  
+**After** = real run with the **Lu Xun demo persona** from `examples/persona-luxun` (`deliver_ok=true`, 182 han, identity + gates + judge pass; fidelity 0.74 / brief 0.91).
 
-### 改写前（普通助手腔）
+### Before (generic assistant)
 
 > 神笔是一个很有用的 AI 写作技能。你可以把喜欢的文章风格做成人格包，以后写稿时直接调用，不用每次都把原文贴进对话框。它还提供机器检查和回执，方便确认稿子有没有跑偏。适合需要长期保持固定文风的创作者和团队使用。整体流程清晰，安装一次就能反复写，比普通网页仿写更省事，也更可控。
 
-### 改写后（鲁迅 demo 人格 · 实跑）
+### After (Lu Xun demo persona · real run)
 
 > 开源工具神笔，说是能装文风人格包，再按包写稿，并出验收回执。装一次人格，往后便可反复调用，不必次次从零捏腔调。
 >
@@ -39,71 +49,71 @@
 >
 > 这里却把人格钉成包，写完还有闸与单可查。冷眼看去，热闹的是仿，认真的是验收，后者才算把「像不像」从嘴上搬到纸面上，少些口头空热闹。
 
-原文档：[`examples/readme-demo/before-plain.md`](examples/readme-demo/before-plain.md) · [`examples/readme-demo/after-luxun.md`](examples/readme-demo/after-luxun.md) · 回执摘要 [`examples/readme-demo/RECEIPT.summary.md`](examples/readme-demo/RECEIPT.summary.md)
+Source: [`examples/readme-demo/before-plain.md`](examples/readme-demo/before-plain.md) · [`examples/readme-demo/after-luxun.md`](examples/readme-demo/after-luxun.md) · receipt summary [`examples/readme-demo/RECEIPT.summary.md`](examples/readme-demo/RECEIPT.summary.md)
 
-> 学的是**笔迹**，不是身份壳。禁止把在世真人商务口吻当「本人」冒充。
+> Learn the *handwriting*, not the identity shell. Do not pass off a living person’s business tone as “themselves”.
 
 ---
 
-## 和网页仿写差在哪
+## Why not another “paste-and-imitate” chat
 
-| 网页 AI | 神笔 |
+| Chat imitator | magicpen |
 |---|---|
-| 每次贴原文 | **Install 一次，Write 多次** |
-| 只出一篇字 | **draft + RECEIPT 验收回执** |
-| 串角色/掉结构常静默 | 身份硬扫 + brief 机检 + 默认评分 |
-| 无法点名复用 | 人格包可安装、可点名 |
+| Paste source every time | **Install once, Write many** |
+| One blob of text | **draft + RECEIPT** |
+| Role bleed / structure loss silent | Identity scan + brief gates + default judge |
+| No reusable pack | Named persona packs |
 
 ---
 
-## 装
+## Install
 
 ```bash
 git clone https://github.com/nakamotosai/magicpen
 ```
 
-技能目录名必须是 **`magicpen`**：
+The skill directory name must be **`magicpen`**:
 
-| 宿主 | 路径 |
+| Host | Path |
 |------|------|
-| omp（本机主宿主） | `~/.omp/agent/skills/magicpen` |
+| omp (primary host) | `~/.omp/agent/skills/magicpen` |
 | Claude Code | `~/.claude/skills/magicpen` |
 | Codex | `~/.codex/skills/magicpen` |
-| 仅本项目 | `.claude/skills/magicpen` |
+| This repo only | `.claude/skills/magicpen` |
 
-人格库默认（**不在本仓库内**）：`~/.omp/magicpen/personas/<id>/`。
+Persona library (default, **not inside this repo**): `~/.omp/magicpen/personas/<id>/`.
 
 ---
 
-## 两入口
+## Two facades
 
-用户话术：**创建人格** → **写稿**（先有包，再写）。
+User flow: **create a persona** → **write** (pack first, then write).
 
-### 创建人格 · 原文 → 人格包
+### Create persona · source → persona pack
 
 ```bash
 pythonw scripts/run_install.py --raw RAW.md --id mypen --calibrate
 ```
 
-产物：`persona.json` `sample.md` `rules.md` `metrics.json`。
+Outputs: `persona.json` `sample.md` `rules.md` `metrics.json`.
 
-### 写稿 · 人格包 + 要求 → 稿 + 回执
+### Write · persona pack + brief → draft + receipt
 
 ```bash
 pythonw scripts/run_write.py --persona mypen --brief BRIEF.md --stage prepare
-# 默认一键写正文（OpenAI 兼容 chat，见下）
+# default one-shot draft (OpenAI-compatible chat, see below)
 pythonw scripts/run_writer_llm.py --run-dir ~/.omp/magicpen/personas/mypen/runs/rN
 pythonw scripts/run_write.py --persona mypen --brief BRIEF.md --stage post --run-id rN
 pythonw scripts/run_judge_llm.py --run-dir ~/.omp/magicpen/personas/mypen/runs/rN
 pythonw scripts/run_write.py --persona mypen --brief BRIEF.md --stage finalize --run-id rN
 ```
 
-**交付物（缺一不可）：** `draft.md` + `RECEIPT.md` + `RECEIPT.json`。  
-`deliver_ok=false` 也要出回执。
+**Required deliverables (none optional):** `draft.md` + `RECEIPT.md` + `RECEIPT.json`.  
+A receipt is still produced when `deliver_ok=false`.
 
 ---
 
-## 本机控制台（人手步进）
+## Local console (manual stepping)
 
 ```bash
 cd ~/.omp/agent/skills/magicpen/console
@@ -111,52 +121,52 @@ pythonw server.py
 # http://127.0.0.1:18766/
 ```
 
-与 skill **同一套** `run_install` / `run_write` / 注入词。  
-W3/W5 默认页内 LLM；W6 出回执成功时**自动拷一份正文到桌面**（库内 `runs/` 仍保留）。
+Same `run_install` / `run_write` / injection phrases as the skill.  
+W3/W5 use the in-page LLM by default; on a successful receipt at W6, **a copy of the draft is auto-placed on the Desktop** (still kept under `runs/` in the library).
 
 ---
 
-## LLM 环境变量
+## LLM env vars
 
-页内写正文 / 评分 / 范文网搜走 OpenAI 兼容 `chat/completions`：
+In-page drafting / scoring / sample search use OpenAI-compatible `chat/completions`:
 
-| 变量 | 含义 |
-|------|------|
-| `CLIPROXYAPI_API_KEY` 或 `MAGICPEN_LLM_KEY` 或 `OPENAI_API_KEY` | 密钥（必填） |
-| `MAGICPEN_LLM_BASE` 或 `CLIPROXY_BASE` 或 `OPENAI_BASE_URL` | 基址，默认 `http://127.0.0.1:8317` |
-| `MAGICPEN_LLM_MODEL` | 模型，默认 `grok-4.5` |
+| Variable | Role |
+|----------|------|
+| `CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY` | API key (required) |
+| `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL` | Base URL (default `http://127.0.0.1:8317`) |
+| `MAGICPEN_LLM_MODEL` | Model (default `grok-4.5`) |
 
-密钥只读环境变量，不写进仓库。
+Keys are read-only env vars, never written into the repo.
 
 ---
 
-## 预设 Demo（装完就能写）
+## Built-in demos (ready after seed)
 
-仓库自带 **三套** 可直接用的人格包样例（在 `examples/`）。装到本机库后，控制台下拉和 `--persona` 都能点名：
+The repo ships **three** ready-to-use persona packs under `examples/`. After seeding into the local library, both the console dropdown and `--persona` can address them:
 
-| 本机 id | 显示名 | 范文 | 路径 |
-|---------|--------|------|------|
-| `laocai` | 老蔡 | 口语空行指纹 | `examples/persona-laocai/` |
-| `luxun` | 鲁迅 · 藤野先生 | 《藤野先生》（公有领域） | `examples/persona-luxun/` |
-| `soseki` | 夏目漱石·我是猫肌理 | 长段冷嘲 | `examples/soseki-wagahai/` |
+| local id | display | sample | path |
+|----------|---------|--------|------|
+| `laocai` | 老蔡 | colloquial blank-line fingerprint | `examples/persona-laocai/` |
+| `luxun` | 鲁迅 · 藤野先生 (*Mr. Fujino*) | 《藤野先生》(public domain) | `examples/persona-luxun/` |
+| `soseki` | 夏目漱石·我是猫肌理 | long-paragraph dry sarcasm | `examples/soseki-wagahai/` |
 
 ```bash
-# 一键装进 ~/.omp/magicpen/personas/（已存在则跳过；--force 覆盖样本不删 runs）
+# one-shot seed into ~/.omp/magicpen/personas/ (skips if present; --force overwrites samples, keeps runs)
 pythonw scripts/seed_demos.py
 
-# 用鲁迅·藤野先生直接写
+# write directly with Lu Xun · Mr. Fujino
 pythonw scripts/run_write.py --persona luxun --brief BRIEF.md --stage prepare
 ```
 
-`examples/readme-demo/` 是 README 前后对比的落盘稿，不是第四套人格。
+`examples/readme-demo/` holds the before/after artifacts used in this README; it is not a fourth persona.
 
 ---
 
-## 合同全文
+## Contract
 
-见 [SKILL.md](SKILL.md)。编排：`references/auto-pipeline.md`。
+Full contract: [SKILL.md](SKILL.md). Orchestration: `references/auto-pipeline.md`.
 
-自检：
+Self-checks:
 
 ```bash
 pythonw scripts/assert_magicpen_no_legacy.py
@@ -165,13 +175,13 @@ pythonw scripts/assert_public_surface.py
 
 ---
 
-## 权利
+## Rights
 
-公开材料学写法 → 可以。  
-整篇原文当己作发表 / 冒充在世真人商务 → **拒绝**。
+Public material for *style study* is fine.  
+Republishing full source as your own work, or impersonating a living person in business, is refused.
 
 ---
 
-## 许可
+## License
 
 MIT · [LICENSE](LICENSE)
