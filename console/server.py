@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-卡卡西本机控制台 · http://127.0.0.1:18766/
-步进操作 Install / Write；编排 skills/kakashi/scripts facade。
+神笔本机控制台 · http://127.0.0.1:18766/
+步进操作 Install / Write；编排 skills/magicpen/scripts facade。
 """
 from __future__ import annotations
 
@@ -25,10 +25,10 @@ SKILL = CONSOLE.parent
 SCRIPTS = SKILL / "scripts"
 STATIC = CONSOLE / "static"
 RUNS = CONSOLE / "runs"
-PERSONA_LIB = Path.home() / ".claude" / "kakashi" / "personas"
+PERSONA_LIB = Path.home() / ".omp" / "magicpen" / "personas"
 
-HOST = os.environ.get("KAKASHI_CONSOLE_HOST", "127.0.0.1")
-PORT = int(os.environ.get("KAKASHI_CONSOLE_PORT", "18766"))
+HOST = os.environ.get("MAGICPEN_CONSOLE_HOST", "127.0.0.1")
+PORT = int(os.environ.get("MAGICPEN_CONSOLE_PORT", "18766"))
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 if str(SCRIPTS) not in sys.path:
@@ -225,13 +225,13 @@ def copy_draft_to_desktop(st: dict, draft: Path | str | None = None) -> dict:
         pass
     run_id = st.get("run_id") or "run"
     ts = datetime.now().strftime("%Y%m%d-%H%M")
-    fname = _safe_filename(f"卡卡西_{display}_{run_id}_{ts}") + ".md"
+    fname = _safe_filename(f"神笔_{display}_{run_id}_{ts}") + ".md"
     desk = resolve_desktop_dir()
     dest = desk / fname
     # 重名则加序号
     if dest.exists():
         for i in range(2, 50):
-            alt = desk / (_safe_filename(f"卡卡西_{display}_{run_id}_{ts}_{i}") + ".md")
+            alt = desk / (_safe_filename(f"神笔_{display}_{run_id}_{ts}_{i}") + ".md")
             if not alt.exists():
                 dest = alt
                 break
@@ -1853,7 +1853,7 @@ class Handler(SimpleHTTPRequestHandler):
         try:
             err = sys.stderr
             if err is not None:
-                err.write("[kakashi-console] " + (fmt % args) + "\n")
+                err.write("[magicpen-console] " + (fmt % args) + "\n")
         except Exception:
             pass
 
@@ -1906,7 +1906,7 @@ class Handler(SimpleHTTPRequestHandler):
                 200,
                 {
                     "ok": True,
-                    "product": "kakashi-console",
+                    "product": "magicpen-console",
                     "version": "0.1",
                     "skill": str(SKILL),
                     "persona_lib": str(PERSONA_LIB),
@@ -2437,7 +2437,7 @@ def main():
     RUNS.mkdir(parents=True, exist_ok=True)
     STATIC.mkdir(parents=True, exist_ok=True)
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
-    _safe_print(f"kakashi console http://{HOST}:{PORT}/")
+    _safe_print(f"magicpen console http://{HOST}:{PORT}/")
     _safe_print(f"personas {PERSONA_LIB}")
     try:
         httpd.serve_forever()

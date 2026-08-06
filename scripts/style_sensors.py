@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""卡卡西 · 风格传感器。
+"""神笔 · 风格传感器。
 
 主产物：**rules.md**（约 20 条一行一句写作指令，直接进提示词）。
 旁产物：**metrics.json**（机器硬分用，不进 Writer 主路径）。
@@ -18,7 +18,7 @@ import re
 import sys
 from pathlib import Path
 
-VERSION = "0.5.2"
+VERSION = "0.6.0-soul"  # v3.4: weighted rules + mind pointer
 
 AI_TELLS = [
     r"综上所述",
@@ -231,21 +231,19 @@ def rel_err(a: float, b: float) -> float:
     return abs(a - b) / abs(b)
 
 
-def rules_md_lines(feat: dict) -> list[str]:
-    """固定约 20 条：一行一句，直接可贴进提示词。"""
+def rules_md_lines(feat: dict) -> list[tuple[str, str]]:
+    """加权 rules：返回 (weight, line)。P0 灵魂/布局 > P1 节奏 > P2 表层计量。
+
+    不再假装 20 条等权。条数可变（约 16–18）。
+    """
     spp = float(feat.get("sents_per_para_mean") or 0)
     ssl = float(feat.get("single_sent_line_ratio") or 0)
-    msl = float(feat.get("multi_sent_line_ratio") or 0)
-    spl = float(feat.get("sents_per_line_mean") or 0)
     sm = float(feat.get("sent_len_mean") or 0)
     ss = float(feat.get("sent_len_std") or 0)
     plm = float(feat.get("para_len_mean") or 0)
-    pls = float(feat.get("para_len_std") or 0)
     dash = float(feat.get("dash_per_1k") or 0)
     punct = float(feat.get("punct_density") or 0)
-    ttr_v = float(feat.get("ttr") or 0)
     pr = float(feat.get("particle_rate") or 0)
-    fcd = float(feat.get("four_char_density") or 0)
     ld = float(feat.get("list_density") or 0)
     ai = float(feat.get("ai_tells_per_1k") or 0)
     sspr = float(feat.get("single_sent_para_ratio") or 0)
@@ -257,85 +255,80 @@ def rules_md_lines(feat: dict) -> list[str]:
         dash_line = "破折号几乎不用；不要为了「文青感」乱加破折。"
     elif dash <= 3.0:
         dash_line = f"破折号很少（约 {dash:.1f}/千字）；可偶用，勿刷屏。"
-    elif dash <= 10.0:
-        dash_line = f"破折号有一定出现（约 {dash:.1f}/千字）；跟样本频率，勿归零也勿翻倍。"
     else:
-        dash_line = f"破折号较密（约 {dash:.1f}/千字）；仿写允许破折，但勿句句都有。"
+        dash_line = f"破折号约 {dash:.1f}/千字；跟样本频率，勿归零也勿翻倍。"
 
-    if ssl >= 0.55:
-        layout_line = "样本一行一句偏多；仿写可短行，但仍要有完整段落感，禁止整页比样本更碎。"
+    if ssl >= 0.55 or sspr >= 0.45:
+        layout_p0 = (
+            "【P0·布局指纹】空行/短段是笔迹本体：意群之间保留空行；"
+            "约一半段落可单句成段（短锤/设问/吐槽），另一半 2–4 句说清事实；"
+            "禁止合成无空行大段散文墙，也禁止无空行电报码。"
+        )
     else:
-        layout_line = "禁止一行一句铺满全篇；多句应落在同一段落里，换行跟样本段落节奏。"
+        layout_p0 = (
+            "【P0·布局指纹】段落感跟样本：多句同段推进；"
+            "禁止一行一句铺满，也禁止整篇一段墙。"
+        )
 
-    # 极端布局：不写「每段 69 句」这种毒指令
-    if pc <= 1 and sc >= 8:
-        para_line = (
-            "样本分段信号弱（几乎被识别成整篇一段）；仿写请按语义自然分段，"
-            "禁止整篇一段墙，也禁止一行一句电报体。"
+    if pr >= 0.04:
+        voice_p0 = (
+            "【P0·口气】口语在场：像跟读者说话；可用轻口语词，勿堆梗合集，勿忽然文言/鲁迅腔。"
         )
-        para_len_line = (
-            "不要把「整篇字数」当成「每段必须写满」；按场面切段，段长可长短交错。"
+    elif pr <= 0.015:
+        voice_p0 = (
+            "【P0·口气】偏冷书面/旁观；勿忽然网感口语注水，也勿口号宣言连发。"
         )
-        spp_line = "段落里多句推进；关键处同段多句，勿全篇口号体，也勿合成超长演讲段。"
     else:
-        para_line = f"样本约 {pc} 段；仿写分段密度跟样本，勿无故砍成碎卡片或合成一段墙。"
-        para_len_line = (
-            f"段落体量大约每段 {plm:.0f} 字量级（波动约 {pls:.0f}）；"
-            "勿切成碎卡片，也勿整篇一大坨。"
-        )
-        if spp >= 25:
-            spp_line = (
-                f"样本段内句子偏多（约 {spp:.0f} 句/段量级）；可写密实段，"
-                "但新文仍应按语义换段，禁止为凑数合成巨型段。"
-            )
-        else:
-            spp_line = f"每段大约 {spp:.1f} 句；不要整篇一段一句，也不要一段写成长篇演讲。"
+        voice_p0 = "【P0·口气】冷热跟样本中段；勿忽然口语注水或忽然文青。"
 
-    lines = [
-        f"样本体量约 {chars} 字、{sc} 句、{pc} 段；新文长短听用户任务，笔迹密度跟样本。",
-        f"句子长短跟样本：句长均值约 {sm:.0f} 字，可有起伏（标准差约 {ss:.0f}）；避免句句等长排比。",
-        spp_line,
-        para_len_line if pc > 1 or sc < 8 else para_line,
-        layout_line,
-        f"一行多句占比约 {msl:.0%}；能同段写完的意思不要拆成电报行。",
-        f"行均约 {spl:.1f} 句；保持可读的行内节奏，不要机械断行。",
-        f"一段一句占比约 {sspr:.0%}；关键推进处应有多句同段，避免全篇口号体。"
-        if sspr < 0.6
-        else f"样本一段一句偏多（约 {sspr:.0%}）；仿写可短段，但关键处仍应有多句推进。",
-        dash_line,
-        f"标点疏密跟样本（密度约 {punct:.2f} 量级）；不要忽然英文腔或整段无标点。",
-        "用词面跟样本量级；不要说明书腔、词典堆砌，也别为「像文青」硬堆成语。",
-        f"语气助词冷热跟样本（约 {pr:.2f} 量级）；勿忽然口语注水或忽然文言。",
-        "四字格/成语点到为止；别为了「有文采」刷屏。",
+    rows: list[tuple[str, str]] = [
+        ("P0", "【P0·思维】判断必须从动作/场面/反差长出；禁止「升华开头→提纲中段→金句结尾」的通用议论文骨架。"),
+        ("P0", "【P0·灵魂】优先遵守 mind.md 的推进步骤（若人格包装有）；rules 只补节奏，不替代怎么想。"),
+        ("P0", layout_p0),
+        ("P0", voice_p0),
+        ("P0", "【P0·反内容】禁止复读 sample 事件/专名/招牌开场（见 content_ban.txt）；新题新事实只听 brief。"),
+        ("P0", "【P0·反身份】学笔迹不学身份壳/物种/职业/样本配角；除非 brief 明文角色仿写。"),
+        ("P1", f"句长跟样本量级（均约 {sm:.0f}，波动约 {ss:.0f}）；避免句句等长排比。"),
+        ("P1", f"段句密度：约 {spp:.1f} 句/段，一段一句占比约 {sspr:.0%}；关键处要有多句推进。"),
+        ("P1", f"段体量约 {plm:.0f} 字量级（样本约 {pc} 段/{sc} 句/{chars} 字）；长短听 brief，密度跟样本。"),
+        ("P1", "先刺激/场面，再查找或对照，再下判断；收束用短句，不写主题演讲。"),
+        ("P1", dash_line),
+        ("P1", "每次开篇与核心隐喻允许不同；禁止篇篇复用同一套船/漆/镜/账本万能隐喻（除非 brief 指定）。"),
+        ("P2", f"标点疏密约 {punct:.2f} 量级；勿忽然英文腔或整段无标点。"),
+        ("P2", "四字格/成语点到为止；别为「有文采」刷屏。"),
         (
-            "样本几乎不用条目列表，仿写也少用 1.2.3. 排比清单。"
+            "P2",
+            "少用 1.2.3. 清单主结构。"
             if ld < 0.08
-            else "样本有一定列表感，可用短列，但勿做成 PPT 提纲体。"
+            else "可用短列，勿做成 PPT 提纲体。",
         ),
         (
-            "禁止「综上所述 / 赋能 / 闭环 / 值得注意的是」等套话；样本没有就更不能加。"
+            "P2",
+            "禁止「综上所述/赋能/闭环/值得注意的是」等套话。"
             if ai <= 0.5
-            else "样本偶有套话痕迹；仿写仍应压低空话，宁冷勿油。"
+            else "压低空话，宁冷勿油。",
         ),
-        (
-            "学的是笔迹与节奏（句长、段法、冷热、收束），不是样本角色/身份/物种/世界观；"
-            "禁止把叙事者壳、样本专名职业搬进新文，除非 brief 明文要求角色仿写。"
-        ),
-        "原文换行与分段是笔迹的一部分；多句同段就同段，不要自行改成一行一句。",
-        "反讽与判断尽量从动作、场面长出，少用「我明白了」后整段主题演讲。",
-        "新文事实、人称、题材只听 brief；样本只供笔迹；禁止用样本情节/道具/配角当默认主角设定。",
-        "只输出新文正文（除非任务要求标题）；写完自检：布局句长 + 是否误带样本身份壳。",
+        ("P2", "只输出新文正文（除非 brief 要标题）；自检：mind 步骤是否走过 + 空行/口气是否像 + 有无 content_ban 命中。"),
     ]
-    # 保证正好 20 条
-    assert len(lines) == 20, len(lines)
-    return lines
+    return rows
 
 
 def write_rules_md(path: Path, feat: dict) -> str:
-    lines = rules_md_lines(feat)
-    body = ["# 写作要领 · rules", "", f"_sensor {VERSION}_", ""]
-    for i, line in enumerate(lines, 1):
-        body.append(f"{i}. {line}")
+    rows = rules_md_lines(feat)
+    body = [
+        "# 写作要领 · rules",
+        "",
+        f"_sensor {VERSION}_",
+        "",
+        "> **权重**：P0 违反 = 不像本人（灵魂/布局/口气/反串戏）；P1 = 节奏；P2 = 表层。",
+        "> **P0 > P1 > P2**。机检绿 ≠ 像；Judge 须按权重打。",
+        "",
+    ]
+    for i, (w, line) in enumerate(rows, 1):
+        body.append(f"{i}. ({w}) {line}")
+    body.append("")
+    # machine-readable weights sidecar hint
+    body.append("<!-- weights: P0=1.0 P1=0.55 P2=0.25 -->")
     body.append("")
     text = "\n".join(body)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -344,50 +337,74 @@ def write_rules_md(path: Path, feat: dict) -> str:
 
 
 def score_vs_metrics(feat: dict, anchor: dict) -> float:
-    # metrics.json 可能包在 {"metrics":{}} 或扁平
+    """加权硬分：布局/段句 > 句长 > 助词 > 破折/套话；降低 ttr 等权幻觉。"""
     if "metrics" in anchor and isinstance(anchor["metrics"], dict):
         anchor = {**anchor["metrics"], **{k: v for k, v in anchor.items() if k != "metrics"}}
-    parts = []
-    parts.append(max(0.0, 1.0 - rel_err(feat["sent_len_mean"], anchor.get("sent_len_mean", feat["sent_len_mean"])) / 0.15))
-    parts.append(max(0.0, 1.0 - rel_err(feat["sent_len_std"], anchor.get("sent_len_std", feat["sent_len_std"] or 1)) / 0.25))
+
+    def clamp01(x: float) -> float:
+        return max(0.0, min(1.0, x))
+
+    weighted: list[tuple[float, float]] = []  # (w, score)
+
+    # P0 layout: single_sent_line_ratio + sents_per_para
+    ar = float(anchor.get("single_sent_line_ratio", 0.35) or 0.35)
+    fr = float(feat.get("single_sent_line_ratio", ar) or ar)
+    if fr <= ar + 0.12:
+        layout_s = 1.0
+    elif fr <= ar + 0.30:
+        layout_s = 0.55
+    else:
+        layout_s = clamp01(1.0 - (fr - ar) / 0.55)
+    weighted.append((1.0, layout_s))
+
+    aspp = float(anchor.get("sents_per_para_mean", 2.0) or 2.0)
+    fspp = float(feat.get("sents_per_para_mean", aspp) or aspp)
+    if aspp > 0 and 0.55 <= (fspp / aspp) <= 1.7:
+        spp_s = 1.0
+    else:
+        ratio = (fspp / aspp) if aspp else 1.0
+        spp_s = clamp01(1.0 - abs(ratio - 1.0))
+    weighted.append((1.0, spp_s))
+
+    # P1 sentence length
+    sl = clamp01(1.0 - rel_err(feat["sent_len_mean"], anchor.get("sent_len_mean", feat["sent_len_mean"])) / 0.18)
+    weighted.append((0.55, sl))
+    ss = clamp01(1.0 - rel_err(feat["sent_len_std"], anchor.get("sent_len_std", feat["sent_len_std"] or 1)) / 0.30)
+    weighted.append((0.35, ss))
+
+    # P1 particle
+    pr = clamp01(1.0 - rel_err(feat["particle_rate"], anchor.get("particle_rate", feat["particle_rate"])) / 0.28)
+    weighted.append((0.55, pr))
+
+    # P2 dash / ai / ttr（降权）
     ad = float(anchor.get("dash_per_1k", 0) or 0)
     fd = float(feat.get("dash_per_1k", 0) or 0)
     if ad <= 0.05:
-        parts.append(1.0 if fd <= 0.5 else max(0.0, 1.0 - (fd - 0.5) / 5.0))
+        dash_s = 1.0 if fd <= 0.5 else clamp01(1.0 - (fd - 0.5) / 5.0)
     else:
         ratio = fd / ad if ad else 1.0
-        if 0.5 <= ratio <= 1.5:
-            parts.append(1.0)
-        else:
-            parts.append(max(0.0, 1.0 - abs(ratio - 1.0)))
-    parts.append(max(0.0, 1.0 - rel_err(feat["ttr"], anchor.get("ttr", feat["ttr"])) / 0.20))
-    parts.append(max(0.0, 1.0 - rel_err(feat["particle_rate"], anchor.get("particle_rate", feat["particle_rate"])) / 0.25))
-    fp = feat["ai_tells_per_1k"]
+        dash_s = 1.0 if 0.5 <= ratio <= 1.5 else clamp01(1.0 - abs(ratio - 1.0))
+    weighted.append((0.25, dash_s))
+
+    fp = feat.get("ai_tells_per_1k") or 0
     if fp == 0:
-        parts.append(1.0)
+        ai_s = 1.0
     elif fp <= 0.5:
-        parts.append(0.7)
+        ai_s = 0.7
     else:
-        parts.append(0.0)
-    ar = float(anchor.get("single_sent_line_ratio", 0.35) or 0.35)
-    fr = float(feat.get("single_sent_line_ratio", ar) or ar)
-    if fr <= ar + 0.15:
-        parts.append(1.0)
-    elif fr <= ar + 0.35:
-        parts.append(0.5)
-    else:
-        parts.append(max(0.0, 1.0 - (fr - ar) / 0.6))
-    aspp = float(anchor.get("sents_per_para_mean", 2.0) or 2.0)
-    fspp = float(feat.get("sents_per_para_mean", aspp) or aspp)
-    if aspp > 0 and 0.5 <= (fspp / aspp) <= 1.8:
-        parts.append(1.0)
-    else:
-        parts.append(max(0.0, 1.0 - abs((fspp / aspp) if aspp else 1.0 - 1.0)))
-    return round(sum(parts) / len(parts), 4)
+        ai_s = 0.0
+    weighted.append((0.35, ai_s))
+
+    ttr_s = clamp01(1.0 - rel_err(feat["ttr"], anchor.get("ttr", feat["ttr"])) / 0.25)
+    weighted.append((0.15, ttr_s))
+
+    num = sum(w * s for w, s in weighted)
+    den = sum(w for w, _ in weighted) or 1.0
+    return round(num / den, 4)
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi style sensors → rules.md + metrics.json")
+    ap = argparse.ArgumentParser(description="magicpen style sensors → rules.md + metrics.json")
     ap.add_argument("--text", type=Path, help="input text file")
     ap.add_argument("--stdin", action="store_true")
     ap.add_argument("--rules", type=Path, help="写出 rules.md（主产物）")

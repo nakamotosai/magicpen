@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""人格库路径解析：默认 ~/.claude/kakashi/personas/<id>。"""
+"""人格库路径解析：默认 ~/.omp/magicpen/personas/<id>。"""
 from __future__ import annotations
 
 import json
@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_LIB = Path.home() / ".claude" / "kakashi" / "personas"
+DEFAULT_LIB = Path.home() / ".omp" / "magicpen" / "personas"
 
 
 def utc_now() -> str:

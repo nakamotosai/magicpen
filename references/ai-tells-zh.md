@@ -16,4 +16,4 @@
 
 ## 与人味闸的关系
 
-对话 always-on 可禁破折；**kakashi 写稿路径**以 voice 样本锚为准（见 `ssot-matrix.md`）。  
+对话 always-on 可禁破折；**magicpen 写稿路径**以 voice 样本锚为准（见 `ssot-matrix.md`）。  

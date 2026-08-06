@@ -28,7 +28,7 @@ def sample_search_package(
     """网搜范文分身：按用户要求找公开作品，清洗后写入 raw.md。"""
     q = (query or "").strip()
     spawn = (
-        "你是【卡卡西 范文搜集分身】。任务：按用户要求，从公开网络找可学**笔迹**的范文，"
+        "你是【神笔 范文搜集分身】。任务：按用户要求，从公开网络找可学**笔迹**的范文，"
         "清洗后写入指定 raw 路径。\n\n"
         "## 硬约束\n"
         "1. **只搜集公开可引用文本**；不碰付费墙破解、盗版站、隐私泄露。\n"
@@ -82,7 +82,7 @@ def writer_package(
 ) -> dict:
     body = write_prompt.read_text(encoding="utf-8")
     spawn = (
-        "你是【卡卡西 Writer 分身】。本任务只做一件事：按 WRITE_PROMPT 写 draft。\n\n"
+        "你是【神笔 Writer 分身】。本任务只做一件事：按 WRITE_PROMPT 写 draft。\n\n"
         "## 硬约束\n"
         "1. **只吃**下面 WRITE_PROMPT 全文（已含 sample 笔迹 + rules + brief）。\n"
         "2. **只写**输出路径中的 draft 正文；禁止改 persona 包其它文件。\n"
@@ -132,7 +132,7 @@ def judge_package(
 ) -> dict:
     body = judge_prompt.read_text(encoding="utf-8")
     spawn = (
-        "你是【卡卡西 Judge 分身】。本任务只做一件事：读 JUDGE_PROMPT，输出评分 JSON。\n\n"
+        "你是【神笔 Judge 分身】。本任务只做一件事：读 JUDGE_PROMPT，输出评分 JSON。\n\n"
         "## 硬约束\n"
         "1. **只吃**下面 JUDGE_PROMPT 全文。\n"
         "2. **只写** JUDGE_SCORE.json（唯一 JSON 对象，无 Markdown 围栏）。\n"
@@ -200,7 +200,7 @@ def write_handoff(pkg: dict, out_dir: Path, *, spawn_name: str = "SPAWN_PROMPT.m
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi AGENT_HANDOFF SSOT")
+    ap = argparse.ArgumentParser(description="magicpen AGENT_HANDOFF SSOT")
     ap.add_argument(
         "--role",
         choices=["writer", "judge", "sample_search"],

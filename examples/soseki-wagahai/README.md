@@ -1,6 +1,6 @@
-# 夏目漱石 · 我是猫 · kakashi 人格包
+# 夏目漱石 · 我是猫 · magicpen 人格包
 
-旧 `examples/soseki-zh-voice` 已删除。本目录为 **卡卡西** 流水线重做版。
+旧 `examples/soseki-zh-voice` 已删除。本目录为 **神笔** 流水线重做版。
 
 ## 人格包
 

@@ -48,6 +48,19 @@ def main() -> int:
     )
     gates.append({"name": "identity", "exit": code_i, "ok": data_i.get("ok", False), "detail": data_i})
 
+    # content bleed (sample events / 富士山问题)
+    code_c, data_c = run_py(
+        root / "assert_content_bleed.py",
+        [
+            "--persona",
+            str(args.persona),
+            "--draft",
+            str(args.draft),
+            *(["--brief", str(args.brief)] if args.brief else []),
+        ],
+    )
+    gates.append({"name": "content_bleed", "exit": code_c, "ok": data_c.get("ok", False), "detail": data_c})
+
     # brief compliance
     code_b, data_b = run_py(
         root / "check_brief_compliance.py",
@@ -58,6 +71,17 @@ def main() -> int:
         ],
     )
     gates.append({"name": "brief_compliance", "exit": code_b, "ok": data_b.get("ok", False), "detail": data_b})
+
+    # v3.5 中段场面/查证（分节文）
+    code_s, data_s = run_py(
+        root / "assert_section_scene.py",
+        [
+            "--draft",
+            str(args.draft),
+            *(["--brief", str(args.brief)] if args.brief else []),
+        ],
+    )
+    gates.append({"name": "section_scene", "exit": code_s, "ok": data_s.get("ok", False), "detail": data_s})
 
     # hard score
     data_h = {}
@@ -77,18 +101,22 @@ def main() -> int:
     else:
         gates.append({"name": "hard_score", "ok": True, "skipped": True, "side_only": True})
 
-    # 机检硬失败：identity + brief；hard 不否决 ok
+    # 机检硬失败：identity + content_bleed + brief + section_scene；hard 不否决 ok
     hard_fail = any(
-        g["name"] in ("identity", "brief_compliance") and not g.get("ok") for g in gates
+        g["name"] in ("identity", "content_bleed", "brief_compliance", "section_scene")
+        and not g.get("ok")
+        for g in gates
     )
     report = {
         "ok": not hard_fail,
         "gates": gates,
         "identity": data_i,
+        "content_bleed": data_c,
         "brief_compliance": data_b,
+        "section_scene": data_s,
         "hard": data_h,
         "manual_review": data_b.get("manual_review") or [],
-        "note": "ok=机检硬闸；交付还须 Judge + dual_axis_gate",
+        "note": "ok=机检硬闸(含内容串戏+中段场面)；交付还须 Judge(含灵魂轴) + dual_axis_gate",
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

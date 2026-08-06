@@ -1,4 +1,4 @@
-# SSOT · kakashi v3.3
+# SSOT · magicpen v3.3
 
 | 级 | SSOT | 管 |
 |---|---|---|
@@ -13,5 +13,5 @@
 | 6 | copywriting | 无 persona |
 | 7 | 模型默认腔 | 应被 4 压死 |
 
-人格库默认：`~/.claude/kakashi/personas/<id>/`。  
-研究材料：`skills/kakashi/archive/`（非 live）。
+人格库默认：`~/.omp/magicpen/personas/<id>/`。  
+研究材料：`skills/magicpen/archive/`（非 live）。

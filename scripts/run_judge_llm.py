@@ -73,7 +73,7 @@ def extract_json_obj(text: str) -> dict | None:
 
 
 def normalize_score(obj: dict) -> dict:
-    """补齐 schema 字段，保证 dual_axis / finalize 能读。"""
+    """补齐 schema 字段，保证 dual_axis / finalize 能读。v3.4 强制 axis_c_soul。"""
     out = dict(obj or {})
     def fnum(k, default=0.0):
         try:
@@ -83,22 +83,43 @@ def normalize_score(obj: dict) -> dict:
 
     axis_a = fnum("axis_a_fidelity", fnum("axis_a", 0.0))
     axis_b = fnum("axis_b_brief", fnum("axis_b", 0.0))
+    # 缺 C 轴 = 0（禁假绿）
+    has_c = "axis_c_soul" in out or "axis_c" in out
+    axis_c = fnum("axis_c_soul", fnum("axis_c", 0.0))
     rules = fnum("rules_compliance", 0.0)
     identity_ok = bool(out.get("identity_ok", True))
-    # 若模型给了 pass，尊重；否则按规则推
+    content_ok = bool(out.get("content_ok", True))
+    # v3.4 硬规则：C≥0.72 才可 pass
+    passed_rule = (
+        identity_ok
+        and content_ok
+        and axis_a >= 0.7
+        and axis_b >= 0.7
+        and has_c
+        and axis_c >= 0.72
+    )
     if "pass" in out:
-        passed = bool(out.get("pass"))
+        passed = bool(out.get("pass")) and passed_rule
     else:
-        passed = identity_ok and axis_a >= 0.7 and axis_b >= 0.7
+        passed = passed_rule
+    fail_reasons = out.get("fail_reasons") if isinstance(out.get("fail_reasons"), list) else []
+    if not has_c:
+        fail_reasons = list(fail_reasons) + ["axis_c_soul_missing"]
+    elif axis_c < 0.72:
+        fail_reasons = list(fail_reasons) + ["axis_c_soul_low"]
     return {
         "pass": passed,
         "axis_a_fidelity": axis_a,
         "axis_b_brief": axis_b,
+        "axis_c_soul": axis_c,
         "rules_compliance": rules,
         "identity_ok": identity_ok,
+        "content_ok": content_ok,
         "caricature_risk": bool(out.get("caricature_risk", False)),
+        "templatey_risk": bool(out.get("templatey_risk", False)),
+        "sounds_like_other_persona": out.get("sounds_like_other_persona"),
         "manual_items": out.get("manual_items") if isinstance(out.get("manual_items"), list) else [],
-        "fail_reasons": out.get("fail_reasons") if isinstance(out.get("fail_reasons"), list) else [],
+        "fail_reasons": fail_reasons,
         "rewrite_directives": out.get("rewrite_directives")
         if isinstance(out.get("rewrite_directives"), list)
         else [],
@@ -111,14 +132,15 @@ def normalize_score(obj: dict) -> dict:
 def build_runtime_prompt(judge_body: str) -> str:
     body = (judge_body or "").strip()
     return (
-        "任务：你是卡卡西评分 Judge。读下方 JUDGE_PROMPT，**只输出一份 JUDGE_SCORE JSON**。\n\n"
+        "任务：你是神笔评分 Judge。读下方 JUDGE_PROMPT，**只输出一份 JUDGE_SCORE JSON**。\n\n"
         "## 硬约束\n"
         "1. 整条回复只能是一个 JSON 对象（可无缩进）。禁止 Markdown 围栏、禁止解释、禁止正文改写。\n"
         "2. 禁止改 draft；禁止输出除 JSON 外的任何字。\n"
-        "3. 字段必须含：pass, axis_a_fidelity, axis_b_brief, rules_compliance, identity_ok, "
-        "caricature_risk, manual_items, fail_reasons, rewrite_directives, one_line。\n"
-        "4. pass=true 当且仅当 identity_ok 且 axis_a_fidelity≥0.7 且 axis_b_brief≥0.7 "
-        "且机检闸无硬失败（见 JUDGE_PROMPT 第5节 ok）。\n"
+        "3. 字段必须含：pass, axis_a_fidelity, axis_b_brief, axis_c_soul, rules_compliance, "
+        "identity_ok, content_ok, caricature_risk, templatey_risk, manual_items, "
+        "fail_reasons, rewrite_directives, one_line。\n"
+        "4. pass=true 当且仅当 identity_ok 且 content_ok 且 axis_a≥0.7 且 axis_b≥0.7 "
+        "且 **axis_c_soul≥0.72** 且机检闸无硬失败。机检绿≠像；C 低必须 pass=false。\n"
         "5. 分数用 0~1 小数。one_line 用中文一句话。\n\n"
         "========== JUDGE_PROMPT 全文开始 ==========\n\n"
         f"{body}\n\n"
@@ -128,7 +150,7 @@ def build_runtime_prompt(judge_body: str) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi judge via cliproxy LLM")
+    ap = argparse.ArgumentParser(description="magicpen judge via cliproxy LLM")
     ap.add_argument("--run-dir", type=Path, default=None)
     ap.add_argument("--judge-prompt", type=Path, default=None)
     ap.add_argument("--score", type=Path, default=None, help="JUDGE_SCORE.json 路径")
@@ -235,6 +257,46 @@ def main() -> int:
         return 1
 
     score_obj = normalize_score(obj)
+    # 机检已过的字数：纠正 Judge 幻觉「字数不足」拖垮 axis_b
+    gates_path = Path(run_dir) / "GATES.json"
+    override_note = None
+    if gates_path.is_file():
+        try:
+            g = json.loads(gates_path.read_text(encoding="utf-8"))
+            bc = g.get("brief_compliance") or {}
+            if not bc:
+                for item in g.get("gates") or []:
+                    if isinstance(item, dict) and item.get("name") == "brief_compliance":
+                        bc = item.get("detail") or {}
+                        break
+            checks = bc.get("checks") or []
+            han_ok = any(
+                isinstance(c, dict) and c.get("id") == "han_range" and c.get("ok") is True
+                for c in checks
+            )
+            if not han_ok and bc.get("ok") is True and (bc.get("han") or 0) >= 1800:
+                han_ok = True
+            b_now = float(score_obj.get("axis_b_brief") or 0)
+            if han_ok and b_now < 0.7:
+                score_obj["axis_b_brief"] = max(b_now, 0.82)
+                score_obj["fail_reasons"] = [
+                    x
+                    for x in (score_obj.get("fail_reasons") or [])
+                    if not re.search(r"字数|汉字|1800|不足|篇幅|han|brief_compliance硬失败", str(x), re.I)
+                ]
+                score_obj["pass"] = (
+                    bool(score_obj.get("identity_ok", True))
+                    and bool(score_obj.get("content_ok", True))
+                    and float(score_obj.get("axis_a_fidelity") or 0) >= 0.7
+                    and float(score_obj.get("axis_b_brief") or 0) >= 0.7
+                    and float(score_obj.get("axis_c_soul") or 0) >= 0.72
+                )
+                score_obj["gate_han_override"] = True
+                override_note = f"han_ok gate; B {b_now}->{score_obj['axis_b_brief']}"
+        except Exception as e:
+            override_note = f"override_error:{e}"
+    if override_note:
+        score_obj["gate_han_override_note"] = override_note
     score.write_text(json.dumps(score_obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     report = {

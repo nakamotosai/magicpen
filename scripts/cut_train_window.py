@@ -192,7 +192,7 @@ def ends_on_paragraph_boundary(source: str, out: str) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="kakashi train window cutter — complete-paragraph boundaries"
+        description="magicpen train window cutter — complete-paragraph boundaries"
     )
     ap.add_argument("--sample", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)

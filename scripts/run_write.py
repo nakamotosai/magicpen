@@ -340,7 +340,7 @@ def stage_finalize(persona: Path, run_id: str, gates_only: bool, keep_runs: int)
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi Write facade")
+    ap = argparse.ArgumentParser(description="magicpen Write facade")
     ap.add_argument("--persona", type=str, required=True, help="id 或路径")
     ap.add_argument("--brief", type=Path, required=True)
     ap.add_argument(

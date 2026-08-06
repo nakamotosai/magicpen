@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Kill: kakashi skill must not keep a second entry dir or old product brand strings."""
+"""Kill: magicpen skill must not keep a second entry dir or old product brand strings."""
 from __future__ import annotations
 
 import re
@@ -9,19 +9,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT.parent
-# 旧兼容目录名（不得存在）
-LEGACY_DIR_NAME = "k" + "age"
+# 旧兼容目录名（不得存在；原 skill 名为 kakashi）
+LEGACY_DIR_NAME = "kakashi"
 LEGACY_DIR = SKILLS / LEGACY_DIR_NAME
 
 # 活表面禁止的旧品牌（拆写避免本文件自检命中）
-_OLD_CN = "影" + "武者"
-_OLD_EN = "k" + "age"
-_OLD_FULL = "Kage" + "musha"
+_OLD_CN = "卡" + "卡西"
+_OLD_JP = "カ" + "カシ"
+_OLD_EN = "kakashi"
+_OLD_COPY = "拷贝忍者"
 
 FORBIDDEN = [
     re.compile(r"\b" + re.escape(_OLD_EN) + r"\b", re.I),
-    re.compile(re.escape(_OLD_FULL), re.I),
+    re.compile(r"\b" + re.escape(_OLD_COPY) + r"\b"),
     re.compile(re.escape(_OLD_CN)),
+    re.compile(re.escape(_OLD_JP)),
     re.compile(r"skills[/\\]" + re.escape(_OLD_EN)),
 ]
 
@@ -33,9 +35,9 @@ SCAN_GLOBS = [
 ]
 
 EXTRA_FILES = [
-    Path.home() / ".claude" / "SPECS" / "style-clone-skill-20260724" / "spec.md",
-    Path.home() / ".claude" / "SPECS" / "style-clone-skill-20260724" / "pipeline-v3-user-lock.md",
-    Path.home() / ".claude" / "SPECS" / "style-clone-skill-20260724" / "naming-candidates.md",
+    Path.home() / ".omp" / "SPECS" / "style-clone-skill-20260724" / "spec.md",
+    Path.home() / ".omp" / "SPECS" / "style-clone-skill-20260724" / "pipeline-v3-user-lock.md",
+    Path.home() / ".omp" / "SPECS" / "style-clone-skill-20260724" / "naming-candidates.md",
 ]
 
 
@@ -75,12 +77,12 @@ def main() -> int:
         errors.append("MISSING_SKILL_MD")
     else:
         head = skill.read_text(encoding="utf-8", errors="replace")[:500]
-        if "name: kakashi" not in head:
-            errors.append("SKILL_NAME_NOT_KAKASHI")
+        if "name: magicpen" not in head:
+            errors.append("SKILL_NAME_NOT_MAGICPEN")
         if re.search(r"name:\s*" + re.escape(_OLD_EN) + r"\b", head):
             errors.append("SKILL_STILL_NAMED_LEGACY")
         # 触发词不得再挂旧品牌
-        if _OLD_CN in head or re.search(r"\b" + re.escape(_OLD_EN) + r"\b", head, re.I):
+        if _OLD_CN in head or _OLD_JP in head or re.search(r"\b" + re.escape(_OLD_EN) + r"\b", head, re.I):
             errors.append("SKILL_TRIGGERS_STILL_LEGACY")
 
     if (ROOT / "examples" / "self-demo-voice").exists():
@@ -106,13 +108,13 @@ def main() -> int:
                 break
 
     if errors:
-        print("FAIL assert_kakashi_no_legacy")
+        print("FAIL assert_magicpen_no_legacy")
         for e in errors[:100]:
             print(" -", e)
         if len(errors) > 100:
             print(f" ... +{len(errors) - 100} more")
         return 1
-    print("PASS assert_kakashi_no_legacy")
+    print("PASS assert_magicpen_no_legacy")
     return 0
 
 

@@ -3,9 +3,9 @@
 """薄封装：经 cliproxyapi 调 chat/completions（默认 grok-4.5）。
 
 密钥只读环境变量，不落盘、不进日志全文：
-  CLIPROXYAPI_API_KEY / OPENAI_API_KEY / KAKASHI_LLM_KEY
-  KAKASHI_LLM_BASE / CLIPROXY_BASE / OPENAI_BASE_URL（默认 http://127.0.0.1:8317）
-  KAKASHI_LLM_MODEL（默认 grok-4.5）
+  CLIPROXYAPI_API_KEY / OPENAI_API_KEY / MAGICPEN_LLM_KEY
+  MAGICPEN_LLM_BASE / CLIPROXY_BASE / OPENAI_BASE_URL（默认 http://127.0.0.1:8317）
+  MAGICPEN_LLM_MODEL（默认 grok-4.5）
 
   pythonw cliproxy_chat.py --prompt SPAWN.md --out raw.md
 """
@@ -27,7 +27,7 @@ DEFAULT_MODEL = "grok-4.5"
 
 def resolve_base() -> str:
     b = (
-        os.environ.get("KAKASHI_LLM_BASE")
+        os.environ.get("MAGICPEN_LLM_BASE")
         or os.environ.get("CLIPROXY_BASE")
         or os.environ.get("OPENAI_BASE_URL")
         or DEFAULT_BASE
@@ -40,7 +40,7 @@ def resolve_base() -> str:
 
 def resolve_key() -> str:
     return (
-        os.environ.get("KAKASHI_LLM_KEY")
+        os.environ.get("MAGICPEN_LLM_KEY")
         or os.environ.get("CLIPROXYAPI_API_KEY")
         or os.environ.get("OPENAI_API_KEY")
         or os.environ.get("ANTHROPIC_AUTH_TOKEN")
@@ -60,11 +60,11 @@ def chat_completions(
     key = resolve_key()
     if not key:
         raise RuntimeError(
-            "缺少 LLM 密钥：请设环境变量 CLIPROXYAPI_API_KEY（或 KAKASHI_LLM_KEY）"
+            "缺少 LLM 密钥：请设环境变量 CLIPROXYAPI_API_KEY（或 MAGICPEN_LLM_KEY）"
         )
     url = base + ("/chat/completions" if base.endswith("/v1") else "/v1/chat/completions")
     body = {
-        "model": model or os.environ.get("KAKASHI_LLM_MODEL") or DEFAULT_MODEL,
+        "model": model or os.environ.get("MAGICPEN_LLM_MODEL") or DEFAULT_MODEL,
         "messages": messages,
         "temperature": temperature,
         "max_tokens": max_tokens,

@@ -1,4 +1,4 @@
-/* 卡卡西控制台 · classic script（禁 type=module） */
+/* 神笔控制台 · classic script（禁 type=module） */
 (() => {
   const $ = (id) => document.getElementById(id);
 
@@ -250,7 +250,7 @@
     sessionId = state.session_id;
     uiStep = state.current_step;
     try {
-      localStorage.setItem("kakashi_session", sessionId);
+      localStorage.setItem("magicpen_session", sessionId);
     } catch (_) {}
     if (m === "install") {
       $("personaSel").value = "";
@@ -485,7 +485,7 @@
     });
     if (!skipRender) {
       // 重绘后立刻回填，避免框被清空；磁盘 hydrate 再校正
-      window.__kakashiRestoreEditor = { key: key, text: text };
+      window.__magicpenRestoreEditor = { key: key, text: text };
       await renderAll();
       restoreEditorIfAny();
     }
@@ -493,7 +493,7 @@
   }
 
   function restoreEditorIfAny() {
-    const r = window.__kakashiRestoreEditor;
+    const r = window.__magicpenRestoreEditor;
     if (!r || !r.text) return;
     if (r.key === "raw" && $("edRaw")) $("edRaw").value = r.text;
     if ((r.key === "brief" || r.key === "draft" || r.key === "judge") && $("edMain"))
@@ -528,7 +528,7 @@
         (job && job.result && job.result.text) ||
         (state.writer_llm && state.writer_llm.text) ||
         "";
-      window.__kakashiRestoreEditor = {
+      window.__magicpenRestoreEditor = {
         key: "draft",
         text: text || undefined,
       };
@@ -606,7 +606,7 @@
       const text =
         (job && job.result && job.result.text) ||
         "";
-      window.__kakashiRestoreEditor = {
+      window.__magicpenRestoreEditor = {
         key: "judge",
         text: text || undefined,
       };
@@ -712,7 +712,7 @@
       if (String(keep || "").trim()) {
         const extra =
           ta.dataset.key === "raw"
-            ? { raw_source: window.__kakashiI1Tab === "search" ? "search" : "paste", skipRender: true }
+            ? { raw_source: window.__magicpenI1Tab === "search" ? "search" : "paste", skipRender: true }
             : { skipRender: true };
         try {
           await saveFile(ta.dataset.key, keep, extra);
@@ -755,7 +755,7 @@
         installDone(state) &&
         (step === "I2" || step === "I3" || step === "I4" || step === "I5" || step === "install_all")
       ) {
-        window.__kakashiForceSlotEdit = false;
+        window.__magicpenForceSlotEdit = false;
         await afterInstallSelectPersona();
       }
       renderAll();
@@ -909,7 +909,7 @@
           }
         } else {
           try {
-            window.__kakashiRestoreEditor = { key: "judge", text: keep };
+            window.__magicpenRestoreEditor = { key: "judge", text: keep };
             await saveFile("judge", keep, { skipRender: true });
           } catch (e) {
             // 非法 JSON：若磁盘已有合法则继续过闸
@@ -951,11 +951,11 @@
           const extra =
             key === "raw"
               ? {
-                  raw_source: window.__kakashiI1Tab === "search" ? "search" : "paste",
+                  raw_source: window.__magicpenI1Tab === "search" ? "search" : "paste",
                   skipRender: true,
                 }
               : { skipRender: true };
-          window.__kakashiRestoreEditor = { key: key, text: keep };
+          window.__magicpenRestoreEditor = { key: key, text: keep };
           await saveFile(key, keep, extra);
         } catch (e) {
           alert(e.message || String(e));
@@ -1115,7 +1115,7 @@
   function slotCardHtml(st, opts) {
     opts = opts || {};
     // 创建完成后默认收起起名框；需要改名再点「改名」
-    if (installDone(st) && !opts.forceEdit && !window.__kakashiForceSlotEdit) {
+    if (installDone(st) && !opts.forceEdit && !window.__magicpenForceSlotEdit) {
       const label = st.new_persona_display || st.persona_id || "已创建";
       return (
         '<div class="slot-card done" id="slotCard">' +
@@ -1233,13 +1233,13 @@
       btnSaveSlot.onclick = () =>
         saveSlotSettings({ requireName: true })
           .then(() => {
-            window.__kakashiForceSlotEdit = false;
+            window.__magicpenForceSlotEdit = false;
           })
           .catch((e) => alert(e.message || e));
     const btnEditSlot = $("btnEditSlot");
     if (btnEditSlot) {
       btnEditSlot.onclick = () => {
-        window.__kakashiForceSlotEdit = true;
+        window.__magicpenForceSlotEdit = true;
         renderAll();
       };
     }
@@ -1343,10 +1343,10 @@
       // 单一范文 SSOT：只有一份 raw。来源切换只改「怎么填入」，不造第二框。
       // 以服务端 raw_source 为准；仅当用户本页刚点过 tab 才用 window 覆盖
       let src = state.raw_source === "search" ? "search" : "paste";
-      if (window.__kakashiI1TabUserSet) {
-        src = window.__kakashiI1Tab === "search" ? "search" : "paste";
+      if (window.__magicpenI1TabUserSet) {
+        src = window.__magicpenI1Tab === "search" ? "search" : "paste";
       }
-      window.__kakashiI1Tab = src;
+      window.__magicpenI1Tab = src;
       const rawHan =
         (state.file_stats && state.file_stats.raw && state.file_stats.raw.han) ||
         (state.sample_search_llm && state.sample_search_llm.han) ||
@@ -1753,7 +1753,7 @@
         const key = ta.dataset.key || "raw";
         const extra =
           key === "raw"
-            ? { raw_source: window.__kakashiI1Tab === "search" ? "search" : "paste" }
+            ? { raw_source: window.__magicpenI1Tab === "search" ? "search" : "paste" }
             : {};
         // 有名字框时一并落盘（不强制）
         if (key === "raw" && ($("edNewPname") || $("edNewPid"))) {
@@ -1764,7 +1764,7 @@
           }
         }
         try {
-          window.__kakashiRestoreEditor = { key: key, text: keep };
+          window.__magicpenRestoreEditor = { key: key, text: keep };
           await saveFile(key, keep, extra);
           restoreEditorIfAny();
           $("serialMsg").textContent =
@@ -1890,7 +1890,7 @@
             { method: "POST", body: JSON.stringify({ query: q }) }
           );
           state = res.state || state;
-          window.__kakashiI1Tab = "search";
+          window.__magicpenI1Tab = "search";
           renderAll();
           $("serialMsg").textContent = "注入词已生成（高级路径）";
         } catch (e) {
@@ -1926,7 +1926,7 @@
           state = res.state || state;
           const job = await pollJob(jid);
           state = await api("/api/session/" + encodeURIComponent(sessionId));
-          window.__kakashiI1Tab = "search";
+          window.__magicpenI1Tab = "search";
           let text =
             (job && job.result && job.result.text) ||
             (state.sample_search_llm && state.sample_search_llm.text) ||
@@ -1977,8 +1977,8 @@
         const next = b.getAttribute("data-i1tab") || "paste";
         // 先把框里未保存字抠住，切 tab 重绘后写回——切换来源不丢正文
         const keep = ($("edRaw") && $("edRaw").value) || "";
-        window.__kakashiI1Tab = next;
-        window.__kakashiI1TabUserSet = true;
+        window.__magicpenI1Tab = next;
+        window.__magicpenI1TabUserSet = true;
         if (sessionId) {
           try {
             await applySettings({ raw_source: next });
@@ -2012,9 +2012,9 @@
       const f = await fetchFile("brief");
       const disk = (f && f.text) || "";
       const restore =
-        (window.__kakashiRestoreEditor &&
-          window.__kakashiRestoreEditor.key === "brief" &&
-          window.__kakashiRestoreEditor.text) ||
+        (window.__magicpenRestoreEditor &&
+          window.__magicpenRestoreEditor.key === "brief" &&
+          window.__magicpenRestoreEditor.text) ||
         "";
       if ($("edMain")) {
         // 磁盘优先；恢复缓冲次之；绝不在有货时留空
@@ -2026,9 +2026,9 @@
       const f = await fetchFile("draft");
       const disk = (f && f.text) || "";
       const restore =
-        (window.__kakashiRestoreEditor &&
-          window.__kakashiRestoreEditor.key === "draft" &&
-          window.__kakashiRestoreEditor.text) ||
+        (window.__magicpenRestoreEditor &&
+          window.__magicpenRestoreEditor.key === "draft" &&
+          window.__magicpenRestoreEditor.text) ||
         "";
       if ($("edMain")) {
         if (disk.trim()) $("edMain").value = disk;
@@ -2137,7 +2137,7 @@
     await loadPersonas();
     let sid = null;
     try {
-      sid = localStorage.getItem("kakashi_session");
+      sid = localStorage.getItem("magicpen_session");
     } catch (_) {}
     if (sid) {
       try {

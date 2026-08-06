@@ -52,7 +52,7 @@ def main() -> int:
     hard = gates.get("hard") or {}
 
     receipt = {
-        "product": "kakashi",
+        "product": "magicpen",
         "version": "3.3",
         "persona": str(args.persona),
         "draft": str(args.draft),
@@ -86,7 +86,7 @@ def main() -> int:
     jp.write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = [
-        "# 卡卡西 · 验收回执 RECEIPT",
+        "# 神笔 · 验收回执 RECEIPT",
         "",
         f"- **可交付**：{'是' if receipt['deliver_ok'] else '否'}",
         f"- **人格包**：`{args.persona}`",

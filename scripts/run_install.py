@@ -62,10 +62,10 @@ def calibrate_rules(persona: Path, qc: dict) -> str | None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi Install：原文→人格包")
+    ap = argparse.ArgumentParser(description="magicpen Install：原文→人格包")
     ap.add_argument("--raw", type=Path, required=True, help="原文路径")
     ap.add_argument("--id", type=str, required=True, help="人格 id")
-    ap.add_argument("--out", type=Path, default=None, help="默认 ~/.claude/kakashi/personas/<id>")
+    ap.add_argument("--out", type=Path, default=None, help="默认 ~/.omp/magicpen/personas/<id>")
     ap.add_argument("--target", type=int, default=2000)
     ap.add_argument("--calibrate", action="store_true", help="布局极端时校准 rules")
     ap.add_argument("--display-name", type=str, default="")
@@ -121,6 +121,15 @@ def main() -> int:
     )
     if code != 0:
         print(json.dumps({"ok": False, "error": "style_sensors failed", "log": out[-2000:]}, ensure_ascii=False))
+        return 1
+
+    # v3.4：思维链 + 内容禁表（灵魂层）
+    code_m, out_m = run(
+        "extract_mind_and_bans.py",
+        ["--persona", str(persona), *(["--llm"] if args.calibrate else [])],
+    )
+    if code_m != 0:
+        print(json.dumps({"ok": False, "error": "extract_mind_and_bans failed", "log": out_m[-1500:]}, ensure_ascii=False))
         return 1
 
     code, qc_out = run("quality_check.py", ["--persona", str(persona)])

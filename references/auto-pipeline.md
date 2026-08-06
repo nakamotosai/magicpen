@@ -1,4 +1,4 @@
-# 全自动流水线 · kakashi v3.3.1（产品态）
+# 全自动流水线 · magicpen v3.3.1（产品态）
 
 > 用户可见：**创建人格** → **写稿**（禁称「装笔」）。  
 > 对内命令：`run_install` / `run_write`。本文件是 facade 内部合同。  
@@ -8,7 +8,7 @@
 
 | 用户话 | 命令 | 作用 |
 |---|---|---|
-| 创建人格 | `run_install.py --raw --id [--calibrate]` | 原文→`~/.claude/kakashi/personas/<id>` |
+| 创建人格 | `run_install.py --raw --id [--calibrate]` | 原文→`~/.omp/magicpen/personas/<id>` |
 | 贴/搜范文 | 手贴 raw；或 `run_sample_search_llm.py`（SPAWN+cliproxy grok-4.5+清洗）；高级 `build_agent_handoff --role sample_search` | I1 样本进会话 `raw.md` |
 | 写稿 | `run_write.py --persona --brief --stage prepare\|post\|finalize` | 写稿编排 + 闸 + RECEIPT |
 | （内） | `build_agent_handoff.py --role writer\|judge\|sample_search` | 分身注入包 SSOT |

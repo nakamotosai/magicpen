@@ -47,33 +47,76 @@ def main() -> int:
     judge_pass = bool(judge.get("pass")) if judge else False
     axis_a = float(judge.get("axis_a_fidelity") or 0)
     axis_b = float(judge.get("axis_b_brief") or 0)
+    # v3.4：缺 axis_c_soul 字段 = 灵魂未评，按 0 处理（禁假绿）
+    has_axis_c = bool(judge) and ("axis_c_soul" in judge)
+    axis_c = float(judge.get("axis_c_soul") or 0) if judge else 0.0
     if judge and "identity_ok" in judge:
         identity_ok = identity_ok and bool(judge["identity_ok"])
+    content_ok = True
+    if gates:
+        for g in gates.get("gates", []) if isinstance(gates.get("gates"), list) else []:
+            if g.get("name") == "content_bleed" and g.get("ok") is False:
+                content_ok = False
+        if "content_bleed" in gates and isinstance(gates["content_bleed"], dict):
+            content_ok = content_ok and bool(gates["content_bleed"].get("ok", True))
+    if judge and "content_ok" in judge:
+        content_ok = content_ok and bool(judge["content_ok"])
+    section_ok = True
+    if gates:
+        for g in gates.get("gates", []) if isinstance(gates.get("gates"), list) else []:
+            if g.get("name") == "section_scene" and g.get("ok") is False:
+                section_ok = False
+        if "section_scene" in gates and isinstance(gates["section_scene"], dict):
+            section_ok = section_ok and bool(gates["section_scene"].get("ok", True))
 
     hard_side_ok = hard_score is None or float(hard_score) >= args.hard_min
 
-    # 交付：机检过 + Judge pass + 身份过；硬分过低只警告不单独否决若 Judge 很强？
-    # 合同：硬分永不单独 PASS；但 hard 极低 + Judge pass 仍 deliver，记 warn
+    # v3.4/3.5：A/B/C 三轴；C 灵魂不足或缺失不得交付（即使机检全绿）
     reasons = []
     if not gates_ok:
         reasons.append("gates_failed")
     if not identity_ok:
         reasons.append("identity_bleed")
+    if not content_ok:
+        reasons.append("content_bleed")
+    if not section_ok:
+        reasons.append("section_scene_fail")
     if not judge:
         reasons.append("judge_missing")
+    elif not has_axis_c:
+        reasons.append("axis_c_soul_missing")
+        judge_pass = False
     elif not judge_pass:
         reasons.append("judge_fail")
         if axis_a < 0.7:
             reasons.append("axis_a_low")
         if axis_b < 0.7:
             reasons.append("axis_b_low")
+        if axis_c < 0.72:
+            reasons.append("axis_c_soul_low")
+    elif axis_c < 0.72:
+        reasons.append("axis_c_soul_low")
+        judge_pass = False
 
-    deliver_ok = gates_ok and identity_ok and judge_pass and bool(judge)
+    deliver_ok = (
+        gates_ok
+        and identity_ok
+        and content_ok
+        and section_ok
+        and judge_pass
+        and bool(judge)
+        and has_axis_c
+        and axis_c >= 0.72
+    )
     warnings = []
     if hard_score is not None and float(hard_score) < args.hard_min:
         warnings.append(f"hard_score {hard_score} < {args.hard_min} (旁证偏低，不单独否决)")
     if not hard_side_ok and deliver_ok:
         warnings.append("deliver_with_low_hard_proxy")
+    if judge and judge.get("templatey_risk"):
+        warnings.append("templatey_risk")
+    if judge and judge.get("sounds_like_other_persona"):
+        warnings.append(f"sounds_like:{judge.get('sounds_like_other_persona')}")
 
     report = {
         "deliver_ok": deliver_ok,
@@ -82,13 +125,16 @@ def main() -> int:
         "hard_side_ok": hard_side_ok,
         "gates_ok": gates_ok,
         "identity_ok": identity_ok,
+        "content_ok": content_ok,
+        "section_ok": section_ok,
         "judge_pass": judge_pass,
         "axis_a_fidelity": axis_a if judge else None,
         "axis_b_brief": axis_b if judge else None,
+        "axis_c_soul": axis_c if judge else None,
         "reasons": reasons,
         "warnings": warnings,
         "rewrite_directives": judge.get("rewrite_directives") if judge else [],
-        "note": "双轴：A=fidelity B=brief；硬分旁证；机检硬闸",
+        "note": "三轴：A笔迹 B=brief C=灵魂；硬分旁证；机检含内容串戏；绿≠像",
     }
     text = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:

@@ -77,10 +77,20 @@ def main() -> int:
         rt = rules_path.read_text(encoding="utf-8")
         numbered = re.findall(r"^\s*\d+\.\s+\S", rt, flags=re.M)
         report["rules_lines"] = len(numbered)
+        # v3.4：加权 rules 约 14–20 条，不再硬要 20
         if len(numbered) < 10:
-            report["warnings"].append(f"rules.md only {len(numbered)} numbered lines; expect ~20")
+            report["warnings"].append(
+                f"rules.md only {len(numbered)} numbered lines; expect ≥10 weighted (P0/P1/P2)"
+            )
+        if "P0" not in rt and "(P0)" not in rt:
+            report["warnings"].append("rules.md missing P0 weights (v3.4 soul layer)")
         if "anchor.json" in rt:
             report["warnings"].append("rules.md unexpectedly mentions anchor.json")
+        # soul files
+        if not (root / "mind.md").exists():
+            report["warnings"].append("missing mind.md (v3.4 thinking chain)")
+        if not (root / "content_ban.txt").exists():
+            report["warnings"].append("missing content_ban.txt (v3.4 content bleed ban)")
 
     for legacy in ("anchor.json", "HARD_ANCHORS.md", "STYLE.md", "knobs.yaml", "SKILL.md"):
         if (root / legacy).exists():

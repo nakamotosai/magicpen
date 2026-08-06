@@ -1,4 +1,4 @@
-# 卡卡西本机控制台
+# 神笔本机控制台
 
 本机网页步进操作 **创建人格 / 写稿**（内部仍是 Install / Write facade）。  
 与 skill 本体 **同一套 facade + 同一套 SPAWN_PROMPT**。  
@@ -10,7 +10,7 @@
 ## 启动
 
 ```bash
-cd ~/.claude/skills/kakashi/console
+cd ~/.omp/agent/skills/magicpen/console
 pythonw server.py
 ```
 
@@ -68,7 +68,7 @@ console/
   runs/<session>/state.json
 ```
 
-run 产物在人格包：`~/.claude/kakashi/personas/<id>/runs/rN/`  
+run 产物在人格包：`~/.omp/magicpen/personas/<id>/runs/rN/`  
 含 `SPAWN_PROMPT.md` `AGENT_HANDOFF.json` `WRITE_PROMPT.md` `draft.md` …
 
 ## 边界

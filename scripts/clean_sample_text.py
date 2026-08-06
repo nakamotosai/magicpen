@@ -83,7 +83,7 @@ def clean_text(raw: str) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi clean sample text")
+    ap = argparse.ArgumentParser(description="magicpen clean sample text")
     ap.add_argument("--in", dest="inp", type=Path, default=None)
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--text", type=str, default=None)

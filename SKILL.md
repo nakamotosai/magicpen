@@ -1,19 +1,19 @@
 ---
-name: kakashi
-description: "卡卡西 / kakashi（カカシ）：可安装文风产线+人格包。Install(原文→persona) / Write(persona+要求→draft+RECEIPT)。触发：卡卡西、kakashi、カカシ、拷贝忍者、人格包、克隆文风。润色→copywriting。"
+name: magicpen
+description: "神笔 / magicpen：可安装文风产线+人格包。Install(原文→persona) / Write(persona+要求→draft+RECEIPT)。触发：神笔、magicpen、神笔马良、文风克隆、人格包、克隆文风、写笔迹。润色→copywriting。"
 ---
 
-# 卡卡西 · kakashi · カカシ
+# 神笔 · magicpen · 神笔
 
 > **可安装的文风产线 + 人格包。**  
 > 不是「更会模仿的对话框」。学笔迹，不学身份。**风格 ≠ 身份**。  
-> 唯一目录：`~/.claude/skills/kakashi`。用户人格库：`~/.claude/kakashi/personas/<id>/`。
+> 唯一目录：`~/.omp/agent/skills/magicpen`。用户人格库：`~/.omp/magicpen/personas/<id>/`。
 >
-> **命名**：借《火影忍者》**复制忍者卡卡西**的意象——复制招式 ≈ 克隆文风；与官方无关联，仅昵称/隐喻。
+> **命名**：取自《神笔马良》——画什么成什么；克隆的是笔迹，不是身份。与官方无关联，仅寓意。
 
 ## 和网页仿写差在哪
 
-| 网页 AI | 卡卡西 |
+| 网页 AI | 神笔 |
 |---|---|
 | 每次贴原文 | **Install 一次，Write 多次** |
 | 只出一篇字 | **draft + RECEIPT 验收回执** |
@@ -33,13 +33,31 @@ description: "卡卡西 / kakashi（カカシ）：可安装文风产线+人格�
 2. 要第二份范文 = **新会话 / 新人格**，禁止双框并存。  
 3. 高级：只生成 SPAWN 外置跑，仍落同一 raw。  
 
-密钥：`CLIPROXYAPI_API_KEY` / `KAKASHI_LLM_KEY` / `OPENAI_API_KEY`；基址 `KAKASHI_LLM_BASE` / `CLIPROXY_BASE`（默认 `http://127.0.0.1:8317`）。
+密钥：`CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY`；基址 `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE`（默认 `http://127.0.0.1:8317`）。
 
 ```bash
 pythonw scripts/run_install.py --raw RAW.md --id laocai [--calibrate]
 ```
 
-产物：`~/.claude/kakashi/personas/<id>/` 下 `sample.md` `rules.md` `metrics.json` `persona.json`。
+产物：`~/.omp/magicpen/personas/<id>/` 下 `sample.md` `rules.md` `metrics.json` `persona.json` + **v3.4** `mind.md` `content_ban.txt`。
+
+### v3.4/v3.5 灵魂层（机检绿 ≠ 像）
+
+| 层 | 作用 |
+|---|---|
+| **mind.md** | 可迁移「怎么想」：刺激→查证/场面→反差→判断→短收；换题不换脑回路 |
+| **content_ban.txt** | 样本事件/专名硬禁（富士山问题）；brief 已写专名豁免 |
+| **rules 加权** | P0 灵魂/布局/口气 > P1 节奏 > P2 表层；条数可变，禁 20 条等权假绿 |
+| **随机槽** | 每跑 seed 抽开篇/隐喻/收束/中段；禁四篇同构万能稿 |
+| **Judge C 轴** | `axis_c_soul≥0.72` 才可 `pass`；缺字段 = 未评 = 失败 |
+| **Writer** | 字数不足/中段提纲 → **先 mind 回炉**再加厚（≤4×1.15）；裸 `一、`→`## 一、`；**写后硬清破折号** |
+| **section_scene** | 分节文每节须有场面/查证动作（v3.5 机检硬闸） |
+| **sample** | **默认注入笔迹样本**；`--no-sample` 仅实验，不作交付默认 |
+| **brief** | 长文用 `references/brief-longform-v35.md`：阶段清单+自拟节题，禁焊死船/漆/镜 |
+
+Kill：`pythonw scripts/assert_soul_v34.py` exit0。  
+交付前另跑：`assert_magicpen_no_legacy.py`。  
+参数锁定与 AB 结论：`references/soul-v34-locked.md`。
 
 ### 写稿 · 人格包 + 要求 → 稿 + 回执（内部：Write / `run_write`）
 
@@ -49,7 +67,7 @@ pythonw scripts/run_install.py --raw RAW.md --id laocai [--calibrate]
 pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage prepare
 # → WRITE_PROMPT + SPAWN_PROMPT.md + AGENT_HANDOFF.json
 # 默认一键写（与控制台 W3 同合同）：
-pythonw scripts/run_writer_llm.py --run-dir ~/.claude/kakashi/personas/laocai/runs/rN
+pythonw scripts/run_writer_llm.py --run-dir ~/.omp/magicpen/personas/laocai/runs/rN
 # → cliproxy grok-4.5 写 draft.md（密钥 CLIPROXYAPI_API_KEY）
 # 高级：外置 Writer 分身仍可整段注入 SPAWN_PROMPT
 pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage post --run-id rN
@@ -76,23 +94,25 @@ pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage finalize 
 ## 人格包
 
 ```
-~/.claude/kakashi/personas/<id>/
+~/.omp/magicpen/personas/<id>/
   persona.json
   sample.md
-  rules.md
+  rules.md            # 加权 P0/P1/P2
+  mind.md             # v3.4 思维链
+  content_ban.txt     # v3.4 内容禁表
   metrics.json
-  identity_ban.txt   # 可选
+  identity_ban.txt    # 可选
   runs/rN/ draft RECEIPT GATES JUDGE_* …
 ```
 
 skill 内 `examples/` 仅 demo（≤3：`laocai` / `luxun`《藤野先生》/ `soseki`）。  
-`pythonw scripts/seed_demos.py` 装进 `~/.claude/kakashi/personas/` 后可直接 `--persona luxun` 写稿。  
+`pythonw scripts/seed_demos.py` 装进 `~/.omp/magicpen/personas/` 后可直接 `--persona luxun` 写稿。  
 研究堆在 `archive/`，**不进默认路径**。
 
 ## 本机控制台（人手步进 · 与 skill 同合同）
 
 ```bash
-cd ~/.claude/skills/kakashi/console
+cd ~/.omp/agent/skills/magicpen/console
 pythonw server.py
 # http://127.0.0.1:18766/
 ```
@@ -140,8 +160,14 @@ pythonw server.py
 | style_sensors / cut_train_window / quality_check | 工厂 |
 | build_write_prompt / build_judge_prompt | 提示组装 |
 | post_write_gates / dual_axis_gate / loop_state | 闸与回环 |
-| assert_identity_bleed / check_brief_compliance | 硬检 |
+| assert_identity_bleed / assert_content_bleed / check_brief_compliance | 硬检 |
+| extract_mind_and_bans | Install 抽 mind+content_ban |
 | hygiene_persona / persona_lib | 库与卫生 |
-| assert_kakashi_no_legacy | Kill 旧名 |
+| assert_magicpen_no_legacy / **assert_soul_v34** | Kill 旧名 / 灵魂层接线 |
 
-交付前：`python3 scripts/assert_kakashi_no_legacy.py` exit0。
+交付前：
+
+```bash
+pythonw scripts/assert_magicpen_no_legacy.py
+pythonw scripts/assert_soul_v34.py
+```

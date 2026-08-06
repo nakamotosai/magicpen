@@ -57,18 +57,30 @@ def parse_brief(brief: str) -> dict:
     if m:
         spec["min_han"] = int(m.group(1))
         spec["max_han"] = int(m.group(2))
-    # 三大块 / 三个标题 / ## 一、
-    if re.search(r"三大块|三个.*标题|##\s*一、|编号的大标题|分三", brief):
+    # 三大块 / 六个标题 / ## 一、 / 一、…六、
+    if re.search(
+        r"三大块|三个.*标题|六个.*标题|六节|##\s*一、|编号的大标题|分三|分六|"
+        r"一、.*二、.*三、",
+        brief,
+        flags=re.S,
+    ):
         spec["require_h2_cn"] = True
-        spec["min_h2_cn"] = 3
-    m = re.search(r"至少\s*(\d+)\s*句.*金句|金句[^\n]{0,12}(\d+)", brief)
-    if m:
-        g = m.group(1) or m.group(2)
-        if g:
-            spec["min_golden"] = int(g)
-    elif "金句" in brief:
-        spec["min_golden"] = 3
-        spec["manual_hints"].append("brief 提到金句但未写条数，默认 ≥3")
+        if re.search(r"六个|六节|分六|##\s*六、|一、.*六、", brief, flags=re.S):
+            spec["min_h2_cn"] = 6
+        else:
+            spec["min_h2_cn"] = 3
+    # 仅在「要写金句」时要求；禁止金句/勿金句 不触发
+    if re.search(r"禁止[^\n]{0,12}金句|勿[^\n]{0,8}金句|金句[^\n]{0,8}禁止|少写金句|别刷金句", brief):
+        pass
+    else:
+        m = re.search(r"至少\s*(\d+)\s*句.*金句|金句[^\n]{0,12}(\d+)", brief)
+        if m:
+            g = m.group(1) or m.group(2)
+            if g:
+                spec["min_golden"] = int(g)
+        elif re.search(r"(至少|需要|写出|插入).{0,8}金句|金句.{0,8}(至少|若干|几句)", brief):
+            spec["min_golden"] = 3
+            spec["manual_hints"].append("brief 提到要写金句但未写条数，默认 ≥3")
     if re.search(r"破折号\s*(尽量\s*)?0|禁止破折|破折号尽量", brief):
         spec["max_dash_per_1k"] = 0.5
     # 禁止 A/B/C
@@ -164,14 +176,21 @@ def main() -> int:
         hi = spec["max_han"] if spec["max_han"] is not None else 10**9
         ok = lo <= han <= hi
         checks.append({"id": "han_range", "ok": ok, "han": han, "min": lo, "max": hi})
-    # h2 cn
+    # h2 cn：接受 `## 一、` 或裸 `一、标题`（Writer 常丢 ##）
     if spec["require_h2_cn"] or (spec["min_h2_cn"] or 0) > 0:
-        titles = [ln.strip() for ln in draft.splitlines() if re.match(r"^##\s*[一二三四五六七八九十]、", ln)]
+        titles = []
+        for ln in draft.splitlines():
+            s = ln.strip()
+            if re.match(r"^#{1,3}\s*[一二三四五六七八九十]、", s):
+                titles.append(s)
+            elif re.match(r"^[一二三四五六七八九十]、\S", s) and han_count(s) <= 40:
+                titles.append(s)
         need = spec["min_h2_cn"] or 3
         ok = len(titles) >= need
+        seq_chars = list("一二三四五六")[: min(need, 6)]
         has_seq = all(
-            any(re.match(rf"^##\s*{c}、", t) for t in titles)
-            for c in list("一二三")[: min(3, need)]
+            any(re.search(rf"(^|\s){c}、", t) for t in titles)
+            for c in seq_chars[: min(3, len(seq_chars))]
         )
         checks.append({
             "id": "h2_cn_numbered",

@@ -50,7 +50,7 @@ def han_count(t: str) -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="kakashi sample_search via cliproxy LLM")
+    ap = argparse.ArgumentParser(description="magicpen sample_search via cliproxy LLM")
     ap.add_argument("--query", type=str, default="")
     ap.add_argument("--query-file", type=Path, default=None)
     ap.add_argument("--out-dir", type=Path, required=True)
@@ -112,7 +112,7 @@ def main() -> int:
         "3. 文首可有且仅可有一行：`<!-- source: 作品名；memory-approx -->`\n"
         "4. 汉字尽量 **500–2000**；宁可完整段落，不要半句。\n"
         "5. 不要 Markdown 标题装饰、不要书评、不要作者简介长文。\n"
-        "6. 不要提 raw 路径、不要提工具、不要提卡卡西。\n\n"
+        "6. 不要提 raw 路径、不要提工具、不要提神笔。\n\n"
         "现在只输出正文：\n"
     )
     spawn_run = out_dir / "SPAWN_PROMPT_RUNTIME.md"

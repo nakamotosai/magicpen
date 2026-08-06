@@ -1,37 +1,35 @@
-# kakashi · 卡卡西 · カカシ
+# magicpen · 神笔 · 神笔
 
 **Installable style pipeline + persona packs.**  
 Learn the *handwriting*, not the *identity*. Style ≠ identity. Install once, Write many times; delivery needs `draft` + `RECEIPT`.
 
 | | |
 |--|--|
-| Chinese brand | **卡卡西** |
-| skill id | **`kakashi`** |
-| Japanese | **カカシ** |
+| Chinese brand | **神笔** |
+| skill id | **`magicpen`** |
+| Japanese | **神笔** |
 
 > 中文: [README.md](README.md)
 
-### Why “kakashi”
+### Why “magicpen”
 
-The name nods to **Hatake Kakashi** from *Naruto* — the **Copy Ninja**, known for copying others’ techniques after seeing them once.
+The name comes from **Ma Liang and his magic brush** (神笔马良) — with a magic pen, anything you draw becomes real. Applied to writing: **install someone’s style as a persona pack, then write with that pack again and again**. You copy *handwriting and rhythm*, not identity. Gates + a receipt check the draft; it is not “paste into chat and freestyle once.”
 
-Here the metaphor is the same, applied to writing: **install someone’s style as a persona pack, then write with that pack again and again**. You copy *handwriting and rhythm*, not identity. Gates + a receipt check the draft; it is not “paste into chat and freestyle once.”
-
-This project is independent open source and **not affiliated with the official franchise**. “Kakashi / Copy Ninja” is a nickname and metaphor only — no trademark claim, no official endorsement.
+“magicpen / 神笔” is an independent concept, meant to suggest “write anything, and it takes shape”. It involves no story characters, trademarks, or official endorsements.
 
 ## Live example · before vs after
 
-Same brief (~200 Chinese characters): **review the kakashi skill itself.**  
+Same brief (~200 Chinese characters): **review the magicpen skill itself.**  
 **Before** = generic assistant prose (no persona).  
 **After** = real run with the **Lu Xun demo persona** from `examples/persona-luxun` (`deliver_ok=true`, 182 han, identity + gates + judge pass; fidelity 0.74 / brief 0.91).
 
 ### Before (generic assistant)
 
-> 卡卡西是一个很有用的 AI 写作技能。你可以把喜欢的文章风格做成人格包，以后写稿时直接调用，不用每次都把原文贴进对话框。它还提供机器检查和回执，方便确认稿子有没有跑偏。适合需要长期保持固定文风的创作者和团队使用。整体流程清晰，安装一次就能反复写，比普通网页仿写更省事，也更可控。
+> 神笔是一个很有用的 AI 写作技能。你可以把喜欢的文章风格做成人格包，以后写稿时直接调用，不用每次都把原文贴进对话框。它还提供机器检查和回执，方便确认稿子有没有跑偏。适合需要长期保持固定文风的创作者和团队使用。整体流程清晰，安装一次就能反复写，比普通网页仿写更省事，也更可控。
 
 ### After (Lu Xun demo persona · real run)
 
-> 开源工具卡卡西，说是能装文风人格包，再按包写稿，并出验收回执。装一次人格，往后便可反复调用，不必次次从零捏腔调。
+> 开源工具神笔，说是能装文风人格包，再按包写稿，并出验收回执。装一次人格，往后便可反复调用，不必次次从零捏腔调。
 >
 > 机器闸卡住格式与禁区，回执把过与不过写明白，亦可复核；比起网页上随口仿写，这里多了一道硬验收。
 >
@@ -45,7 +43,7 @@ Style ≠ identity. Do not impersonate living people for business.
 
 ## Why not another “paste-and-imitate” chat
 
-| Chat imitator | kakashi |
+| Chat imitator | magicpen |
 |---|---|
 | Paste source every time | **Install once, Write many** |
 | One blob of text | **draft + RECEIPT** |
@@ -55,21 +53,21 @@ Style ≠ identity. Do not impersonate living people for business.
 ## Install
 
 ```bash
-git clone https://github.com/nakamotosai/kakashi
+git clone https://github.com/nakamotosai/magicpen
 ```
 
-Skill directory name must be **`kakashi`** under `~/.claude/skills/` (or project `.claude/skills/`).
+Skill directory name must be **`magicpen`** under `~/.claude/skills/` (or project `.claude/skills/`).
 
-Persona library (not in this repo): `~/.claude/kakashi/personas/<id>/`.
+Persona library (not in this repo): `~/.omp/magicpen/personas/<id>/`.
 
 ## Two facades
 
 ```bash
 pythonw scripts/run_install.py --raw RAW.md --id mypen --calibrate
 pythonw scripts/run_write.py --persona mypen --brief BRIEF.md --stage prepare
-pythonw scripts/run_writer_llm.py --run-dir ~/.claude/kakashi/personas/mypen/runs/rN
+pythonw scripts/run_writer_llm.py --run-dir ~/.omp/magicpen/personas/mypen/runs/rN
 pythonw scripts/run_write.py --persona mypen --brief BRIEF.md --stage post --run-id rN
-pythonw scripts/run_judge_llm.py --run-dir ~/.claude/kakashi/personas/mypen/runs/rN
+pythonw scripts/run_judge_llm.py --run-dir ~/.omp/magicpen/personas/mypen/runs/rN
 pythonw scripts/run_write.py --persona mypen --brief BRIEF.md --stage finalize --run-id rN
 ```
 
@@ -78,7 +76,7 @@ Required deliverables: `draft.md` + `RECEIPT.md` + `RECEIPT.json`.
 ## Local console
 
 ```bash
-cd ~/.claude/skills/kakashi/console
+cd ~/.omp/agent/skills/magicpen/console
 pythonw server.py
 # http://127.0.0.1:18766/
 ```
@@ -89,9 +87,9 @@ Same facades as the skill. On successful finalize, a copy of the draft is placed
 
 | Variable | Role |
 |----------|------|
-| `CLIPROXYAPI_API_KEY` / `KAKASHI_LLM_KEY` / `OPENAI_API_KEY` | API key (required) |
-| `KAKASHI_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL` | Base URL (default `http://127.0.0.1:8317`) |
-| `KAKASHI_LLM_MODEL` | Model (default `grok-4.5`) |
+| `CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY` | API key (required) |
+| `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL` | Base URL (default `http://127.0.0.1:8317`) |
+| `MAGICPEN_LLM_MODEL` | Model (default `grok-4.5`) |
 
 ## Built-in demos (ready after seed)
 
@@ -113,7 +111,7 @@ pythonw scripts/run_write.py --persona luxun --brief BRIEF.md --stage prepare
 Full contract: [SKILL.md](SKILL.md).
 
 ```bash
-pythonw scripts/assert_kakashi_no_legacy.py
+pythonw scripts/assert_magicpen_no_legacy.py
 pythonw scripts/assert_public_surface.py
 ```
 

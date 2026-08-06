@@ -6,9 +6,9 @@
   pythonw scripts/seed_demos.py --force   # 覆盖已存在 id
 
 装完后：
-  ~/.claude/kakashi/personas/laocai   老蔡
-  ~/.claude/kakashi/personas/luxun    鲁迅 · 藤野先生
-  ~/.claude/kakashi/personas/soseki   夏目漱石·我是猫肌理
+  ~/.omp/magicpen/personas/laocai   老蔡
+  ~/.omp/magicpen/personas/luxun    鲁迅 · 藤野先生
+  ~/.omp/magicpen/personas/soseki   夏目漱石·我是猫肌理
 
 即可：
   pythonw scripts/run_write.py --persona luxun --brief BRIEF.md --stage prepare
@@ -117,7 +117,7 @@ def seed_one(demo: dict, *, force: bool) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="seed kakashi demo personas into local lib")
+    ap = argparse.ArgumentParser(description="seed magicpen demo personas into local lib")
     ap.add_argument("--force", action="store_true", help="覆盖已存在包的样本/rules（保留 runs/）")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
