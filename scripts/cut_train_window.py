@@ -44,6 +44,12 @@ def take_han_sentence(text: str, n: int) -> str:
         if s[i] in "。！？!?":
             s = s[: i + 1]
             break
+    else:
+        # 长句无句末标点：回落最近逗号/分号，勿硬切断句
+        for i in range(len(s) - 1, max(0, len(s) - 120), -1):
+            if s[i] in "，、；;,":
+                s = s[: i + 1]
+                break
     return s.strip()
 
 

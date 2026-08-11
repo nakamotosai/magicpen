@@ -36,7 +36,9 @@ def run(script: str, args: list[str]) -> tuple[int, dict | str]:
         end = text.rfind("}") + 1
         data = json.loads(text[start:end]) if start >= 0 else {"raw": text, "stderr": p.stderr}
     except json.JSONDecodeError:
-        data = {"raw": text, "stderr": p.stderr, "ok": p.returncode == 0}
+        data = {"raw": text, "stderr": p.stderr, "ok": False}
+    if p.returncode != 0 and isinstance(data, dict) and "ok" not in data:
+        data["ok"] = False
     return p.returncode, data
 
 
@@ -56,14 +58,15 @@ def stage_prepare(persona: Path, brief: Path, run_id: str, max_loops: int) -> di
     dest_brief = run_dir / "brief.md"
     dest_brief.write_text(brief.read_text(encoding="utf-8"), encoding="utf-8")
 
-    # loop init if needed
+    # loop init if needed（文件损坏按需重 init，防 JSON 崩溃）
     ls = persona / "runs" / "loop_state.json"
-    if not ls.exists() or json.loads(ls.read_text(encoding="utf-8")).get("status") in (
-        "passed",
-        "exhausted",
-        "aborted",
-        "idle",
-    ):
+    ls_status = None
+    if ls.exists():
+        try:
+            ls_status = json.loads(ls.read_text(encoding="utf-8")).get("status")
+        except (json.JSONDecodeError, OSError):
+            ls_status = None
+    if ls_status in (None, "passed", "exhausted", "aborted", "idle"):
         run("loop_state.py", ["--persona", str(persona), "init", "--max-loops", str(max_loops)])
 
     code, can = run("loop_state.py", ["--persona", str(persona), "can-write"])
@@ -145,20 +148,23 @@ def stage_post(persona: Path, run_id: str, gates_only: bool) -> dict:
     }
 
     if gates_only:
-        # 合成 Judge：机检过即 pass（快路径）
+        # 合成 Judge：机检过即 pass（快路径，v3.4 需轴 C 字段否则 dual_axis 恒拒）
+        gates_ok_inner = bool(result["gates_ok"])
         fake = {
-            "pass": bool(result["gates_ok"]),
-            "axis_a_fidelity": 0.75 if result["gates_ok"] else 0.4,
-            "axis_b_brief": 0.85 if result["gates_ok"] else 0.3,
+            "pass": gates_ok_inner,
+            "axis_a_fidelity": 0.75 if gates_ok_inner else 0.4,
+            "axis_b_brief": 0.85 if gates_ok_inner else 0.3,
+            "axis_c_soul": 0.75 if gates_ok_inner else 0.3,
+            "content_ok": gates_ok_inner,
             "rules_compliance": 0.7,
             "identity_ok": (gates_data.get("identity") or {}).get("ok", True)
             if isinstance(gates_data, dict)
             else True,
             "caricature_risk": False,
             "manual_items": [],
-            "fail_reasons": [] if result["gates_ok"] else ["gates_failed"],
+            "fail_reasons": [] if gates_ok_inner else ["gates_failed"],
             "rewrite_directives": []
-            if result["gates_ok"]
+            if gates_ok_inner
             else ["按 GATES.json 失败项改 brief 合规与身份"],
             "one_line": "gates-only 快路径合成 Judge",
             "gates_only": True,
@@ -288,7 +294,7 @@ def stage_finalize(persona: Path, run_id: str, gates_only: bool, keep_runs: int)
         ],
     )
 
-    gates_ok = bool(isinstance(deliv, dict) and deliv.get("gates_ok", True))
+    gates_ok = bool(isinstance(deliv, dict) and deliv.get("gates_ok") is True)
     judge_pass = bool(isinstance(deliv, dict) and deliv.get("judge_pass"))
     hard_score = deliv.get("hard_score") if isinstance(deliv, dict) else None
     run(
@@ -315,7 +321,7 @@ def stage_finalize(persona: Path, run_id: str, gates_only: bool, keep_runs: int)
             str(persona),
             "finalize",
             "--result",
-            "passed" if deliver_ok else "exhausted",
+            "passed" if deliver_ok else ("exhausted" if code_d == 0 else "aborted"),
         ],
     )
 

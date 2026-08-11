@@ -654,7 +654,7 @@
       } catch (_) {}
       const boxHan = (box.match(/[一-鿿]/g) || []).length;
       const llmHan = (state && state.writer_llm && state.writer_llm.han) || 0;
-      if (Math.max(boxHan, diskHan, llmHan) >= 50) {
+      if (Math.max(boxHan, diskHan, llmHan) >= 100) {
         await approve("W3");
         return;
       }

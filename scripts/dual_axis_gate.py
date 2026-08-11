@@ -31,6 +31,30 @@ def main() -> int:
     judge = loadj(args.judge)
     gates = loadj(args.gates)
 
+    if args.gates is None or not args.gates.exists():
+        report = {
+            "deliver_ok": False,
+            "ok": False,
+            "gates_ok": False,
+            "identity_ok": False,
+            "content_ok": False,
+            "section_ok": False,
+            "judge_pass": False,
+            "axis_a_fidelity": None,
+            "axis_b_brief": None,
+            "axis_c_soul": None,
+            "reasons": ["gates_missing"],
+            "warnings": [],
+            "rewrite_directives": [],
+            "note": "gates 文件缺失，fail-closed",
+        }
+        text = json.dumps(report, ensure_ascii=False, indent=2)
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(text, encoding="utf-8")
+        print(text)
+        return 1
+
     hard_score = hard.get("score_vs_anchor")
     if hard_score is None and isinstance(hard.get("summary"), dict):
         hard_score = hard["summary"].get("score_vs_anchor")

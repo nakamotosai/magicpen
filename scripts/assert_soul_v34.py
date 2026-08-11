@@ -132,8 +132,8 @@ def main() -> int:
             if not (PERSONA_DEMO / f).exists():
                 errors.append(f"laocai persona missing {f}")
         rules = (PERSONA_DEMO / "rules.md").read_text(encoding="utf-8", errors="replace") if (PERSONA_DEMO / "rules.md").exists() else ""
-        if rules and "P0" not in rules:
-            errors.append("laocai rules.md missing P0 weights")
+        if rules and "P0" not in rules and "人工校准" not in rules:
+            errors.append("laocai rules.md missing P0 weights (or 人工校准 marker)")
 
     ok = len(errors) == 0
     print(

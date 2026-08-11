@@ -80,6 +80,21 @@ def seed_one(demo: dict, *, force: bool) -> dict:
         if sp.is_file():
             shutil.copy2(sp, dest / name)
             copied.append(name)
+    # v3.4 灵魂层（mind.md + content_ban.txt）：examples 源不含，落库后启发式生成（无 LLM 依赖）
+    import subprocess
+
+    gen = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "extract_mind_and_bans.py"), "--persona", str(dest)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    if gen.returncode == 0:
+        for soul in ("mind.md", "content_ban.txt"):
+            if (dest / soul).is_file():
+                copied.append(soul)
+    else:
+        copied.append(f"soul_gen_failed: {gen.returncode}")
     # persona.json 用本机 id（examples 里可能是旧 meta）
     sample = (dest / "sample.md").read_text(encoding="utf-8", errors="replace")
     import re

@@ -1152,8 +1152,8 @@ def approve_step(st: dict, step: str) -> None:
             raise RuntimeError("请先写要求（brief）并保存")
     elif step == "W3":
         draft = Path(st.get("paths", {}).get("draft") or "")
-        if not draft.is_file() or han_count(draft.read_text(encoding="utf-8", errors="replace")) < 50:
-            raise RuntimeError("请先保存 draft 正文")
+        if not draft.is_file() or han_count(draft.read_text(encoding="utf-8", errors="replace")) < 100:
+            raise RuntimeError(f"请先保存 draft 正文（≥100 汉字；后端 W4 硬闸同阈值）")
     elif step == "W5" and not st.get("gates_only"):
         js = Path(st.get("paths", {}).get("judge_score") or "")
         if not js.is_file() or not js.stat().st_size:
@@ -1880,7 +1880,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", "http://127.0.0.1:18766")
         self.send_header("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
@@ -2243,7 +2243,7 @@ class Handler(SimpleHTTPRequestHandler):
             def job_fn(log):
                 st2 = load_state(sid)
                 if step in ("I2", "I4", "I5", "install_all"):
-                    res = run_install_full(st2, log, calibrate=calibrate or step == "I3")
+                    res = run_install_full(st2, log, calibrate=calibrate)
                 elif step == "I3":
                     res = run_install_full(st2, log, calibrate=True)
                 elif step == "W2":

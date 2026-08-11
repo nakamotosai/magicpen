@@ -20,7 +20,7 @@ ROLEPLAY_OK = re.compile(
     r"|可用猫|可用「?咱家|允许身份壳",
     re.I,
 )
-ROLEPLAY_DENY = re.compile(r"禁止[^。\n]{0,16}(?:角色仿写|同世界观|猫|咱家|身份壳)", re.I)
+ROLEPLAY_DENY = re.compile(r"禁止[^。\n]{0,16}(?:角色仿写|同世界观|咱家|身份壳|猫叙事)", re.I)
 
 # 常见文学壳；仅当 sample 也出现时才启用（避免误伤「猫」字成语）
 CONDITIONAL_SHELLS = [
@@ -53,14 +53,13 @@ def infer_bans(sample: str, ban_file: Path | None) -> list[str]:
     for tok in CONDITIONAL_SHELLS:
         if tok in sample:
             bans.append(tok)
-    # 「是猫 / 咱家是猫」强身份
+    # 「是猫 / 咱家是猫」强身份：只用短语，禁单字「猫」（误杀猫题散文）
     if re.search(r"是猫|猫。|猫，", sample) and "猫" not in bans:
-        # 仅当样本高频自称猫时启用单字「猫」——过宽，改用短语
-        if "咱家是猫" in sample or "吾辈是猫" in sample:
+        # 仅当样本高频自称猫时启用短语禁词——单字猫过宽，弃用
+        if "咱家是猫" in sample:
             bans.append("咱家是猫")
+        if "吾辈是猫" in sample:
             bans.append("吾辈是猫")
-            if "猫" not in bans:
-                bans.append("猫")
     if ban_file and ban_file.exists():
         for ln in ban_file.read_text(encoding="utf-8").splitlines():
             s = ln.strip()
@@ -85,6 +84,25 @@ def main() -> int:
     args = ap.parse_args()
 
     draft = args.draft.read_text(encoding="utf-8") if args.draft.exists() else ""
+
+    if han_count(draft) < 1:
+        report = {
+            "ok": False,
+            "skipped": False,
+            "hits": [],
+            "bans_active": [],
+            "draft_han": 0,
+            "persona": str(args.persona),
+            "draft": str(args.draft),
+            "note": "draft 无正文，身份闸 fail-closed 禁空稿放行",
+        }
+        text = json.dumps(report, ensure_ascii=False, indent=2)
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(text, encoding="utf-8")
+        print(text)
+        return 1
+
     brief = ""
     if args.brief and args.brief.exists():
         brief = args.brief.read_text(encoding="utf-8")

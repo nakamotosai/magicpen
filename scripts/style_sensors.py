@@ -466,7 +466,7 @@ def main() -> int:
                 "rules": str(args.rules) if args.rules else None,
                 "metrics": str(args.metrics) if args.metrics else None,
                 "score_vs_anchor": feat.get("score_vs_anchor"),
-                "rules_lines": 20 if rules_text else None,
+                "rules_lines": len(rules_text.splitlines()) if rules_text else None,
                 "error": feat.get("error"),
             },
             ensure_ascii=False,

@@ -32,9 +32,7 @@ def resolve_base() -> str:
         or os.environ.get("OPENAI_BASE_URL")
         or DEFAULT_BASE
     ).strip().rstrip("/")
-    # Anthropic base 常无 /v1；chat 要挂 /v1
-    if b.endswith("/v1"):
-        return b
+    # /v1 挂载策略在 chat_completions 拼 URL 时处理（Anthropic base 常无 /v1）
     return b
 
 
@@ -54,7 +52,7 @@ def chat_completions(
     model: str | None = None,
     temperature: float = 0.4,
     max_tokens: int = 8192,
-    timeout: int = 300,
+    timeout: int | None = None,
 ) -> dict:
     base = resolve_base()
     key = resolve_key()
@@ -62,6 +60,7 @@ def chat_completions(
         raise RuntimeError(
             "缺少 LLM 密钥：请设环境变量 CLIPROXYAPI_API_KEY（或 MAGICPEN_LLM_KEY）"
         )
+    timeout = timeout or int(os.environ.get("MAGICPEN_LLM_TIMEOUT") or 300)
     url = base + ("/chat/completions" if base.endswith("/v1") else "/v1/chat/completions")
     body = {
         "model": model or os.environ.get("MAGICPEN_LLM_MODEL") or DEFAULT_MODEL,
@@ -70,25 +69,43 @@ def chat_completions(
         "max_tokens": max_tokens,
         "stream": False,
     }
+    if os.environ.get("MAGICPEN_LLM_REASONING"):
+        body["reasoning_effort"] = os.environ["MAGICPEN_LLM_REASONING"]
     data = json.dumps(body, ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(
-        url,
-        data=data,
-        method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {key}",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
-            code = resp.status
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8", errors="replace")[:2000]
-        raise RuntimeError(f"LLM HTTP {e.code}: {err_body}") from e
-    except Exception as e:
-        raise RuntimeError(f"LLM 请求失败: {e}") from e
+
+    # 5xx/连接类错误退避重试（幂等生成；4xx 不重试）
+    import time
+
+    last_err: Exception | None = None
+    for attempt in range(3):
+        if attempt:
+            time.sleep(1.5 * attempt)
+        req = urllib.request.Request(
+            url,
+            data=data,
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {key}",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                raw = resp.read().decode("utf-8", errors="replace")
+                code = resp.status
+            break
+        except urllib.error.HTTPError as e:
+            last_err = e
+            if e.code < 500:
+                err_body = e.read().decode("utf-8", errors="replace")[:2000]
+                raise RuntimeError(f"LLM HTTP {e.code}: {err_body}") from e
+            # 5xx：退避重试
+            continue
+        except Exception as e:
+            last_err = e
+            continue
+    else:
+        raise RuntimeError(f"LLM 请求失败（重试 3 次后）: {last_err}") from last_err
 
     try:
         payload = json.loads(raw)

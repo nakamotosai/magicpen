@@ -31,7 +31,15 @@ def prune_runs(persona: Path, keep: int, dry: bool) -> dict:
     if not runs.is_dir():
         return {"pruned": [], "kept": [], "note": "no runs/"}
     dirs = [d for d in runs.iterdir() if d.is_dir() and not d.name.startswith("_")]
-    dirs.sort(key=lambda d: d.stat().st_mtime, reverse=True)
+    # 目录 mtime 不随文件内容更新，按目录内最新文件 mtime 排序更准
+    def dir_newest(d: Path) -> float:
+        mt = d.stat().st_mtime
+        for f in d.rglob("*"):
+            if f.is_file():
+                mt = max(mt, f.stat().st_mtime)
+        return mt
+
+    dirs.sort(key=dir_newest, reverse=True)
     kept = dirs[:keep]
     prune = dirs[keep:]
     removed = []
@@ -39,11 +47,8 @@ def prune_runs(persona: Path, keep: int, dry: bool) -> dict:
         removed.append(str(d))
         if not dry:
             shutil.rmtree(d, ignore_errors=True)
-    # 清理临时 metrics
-    for name in ("_last_draft_metrics.json",):
-        f = runs / name
-        # 保留 loop_state
-        pass
+    # _last_draft_metrics.json 是 finalize 重建 HARD.json 的依赖（run_write），保留不删；
+    # 新 run 的 score_loop 会覆盖写。loop_state.json 同理保留。
     return {
         "kept": [str(k) for k in kept],
         "pruned": removed,

@@ -130,7 +130,7 @@ def metrics_param_block(persona: Path) -> str:
         if k in m and m[k] is not None:
             lines.append(f"{i}. {label} ≈ {m[k]}")
     lines.append(
-        f"{len(lines)}. 版式目标：空行密；约一半单句成段；句长均值附近波动，禁止句句等长。"
+        f"{len(lines) + 1}. 版式目标：空行密；约一半单句成段；句长均值附近波动，禁止句句等长。"
     )
     return "\n".join(lines)
 

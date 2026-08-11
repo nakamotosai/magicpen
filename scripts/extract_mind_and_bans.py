@@ -50,9 +50,15 @@ def extract_content_bans(text: str) -> list[str]:
         if tok in text:
             bans.append(tok)
 
-    # 英文专名（媒体/品牌）
-    for m in re.finditer(r"\b([A-Z][a-zA-Z]{3,}(?:\s+[A-Z][a-zA-Z]+)?)\b", text):
-        bans.append(m.group(1))
+    # 英文专名（媒体/品牌）：仅频次≥2 才收，防普通大写词误成硬禁
+    # re.A (ASCII) 让 \b 在中文与英文字母之间产生边界（默认 Unicode 模式中文算 \w）
+    en_counts: dict[str, int] = {}
+    for m in re.finditer(r"\b([A-Z][a-zA-Z]{3,}(?:\s+[A-Z][a-zA-Z]+)?)\b", text, re.A):
+        tok = m.group(1)
+        en_counts[tok] = en_counts.get(tok, 0) + 1
+    for tok, cnt in en_counts.items():
+        if cnt >= 2:
+            bans.append(tok)
 
     # 去噪
     stop = {

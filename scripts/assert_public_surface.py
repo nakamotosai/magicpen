@@ -23,14 +23,22 @@ SKIP_SUFFIX = {".pyc", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".zip"}
 SELF = Path(__file__).resolve()
 
 BAD_HOST = re.compile(
-    r"tail[0-9a-z]+\.ts\.net|vps-jp\.tail|tailscale\.net",
+    r"tail[0-9a-z]+\.ts\.net|vps-jp\.tail|tailscale\.net|"
+    r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})|"
+    r"\b100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}",
     re.I,
 )
 BAD_ABS_USER = re.compile(r"[A-Za-z]:\\Users\\[^\\\s\"']+", re.I)
 BAD_SECRET = re.compile(
-    r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{12,}"
+    r"""(?i)
+    (?:api[_-]?key|secret|token|password|key)\s*[:=]\s*
+    ['"]  # 必须是字符串字面量（引号成对闭合），排除 URL query 与 JS 拼接
+    [A-Za-z0-9_\-+/=]{12,}  # 密钥本体（无空格、无 JS 运算符）
+    ['"]
+    """,
+    re.VERBOSE,
 )
-BAD_BEARER = re.compile(r"Bearer\s+[A-Za-z0-9\-._~+/]{20,}")
+BAD_BEARER = re.compile(r"Bearer\s+[A-Za-z0-9\-._~+/]{20,}|\"Bearer \"\s*\+")
 
 
 def iter_files():

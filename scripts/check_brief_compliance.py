@@ -93,7 +93,7 @@ def parse_brief(brief: str) -> dict:
                 if re.search(r"[是的了在]$", p) and len(p) > 4:
                     continue
                 spec["ban_words"].append(p)
-    for tok in ("猫", "咱家", "鱼干"):
+    for tok in ("咱家", "鱼干"):
         if re.search(rf"禁止[^\n]{{0,20}}{re.escape(tok)}|{re.escape(tok)}[^\n]{{0,8}}禁止", brief):
             if tok not in spec["ban_words"]:
                 spec["ban_words"].append(tok)
@@ -136,6 +136,22 @@ def main() -> int:
     args = ap.parse_args()
 
     draft = args.draft.read_text(encoding="utf-8") if args.draft.exists() else ""
+    if han_count(draft) < 1:
+        report = {
+            "ok": False,
+            "han": 0,
+            "spec": {},
+            "checks": [],
+            "error": "draft_empty_or_missing",
+            "manual_review": [],
+            "note": "draft 无正文，brief 闸 fail-closed 禁空稿放行",
+        }
+        text = json.dumps(report, ensure_ascii=False, indent=2)
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(text, encoding="utf-8")
+        print(text)
+        return 1
     brief = args.brief.read_text(encoding="utf-8") if args.brief and args.brief.exists() else ""
     spec = parse_brief(brief) if brief else {
         "min_han": None,

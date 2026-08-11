@@ -76,6 +76,17 @@ def main() -> int:
     args = ap.parse_args()
 
     draft = args.draft.read_text(encoding="utf-8") if args.draft.exists() else ""
+    if len(re.findall(r"[一-鿿]", draft)) < 1:
+        report = {
+            "ok": False,
+            "gate": "section_scene",
+            "skipped": False,
+            "error": "draft_empty_or_missing",
+            "reason": "draft 无正文，场面闸 fail-closed 禁空稿放行",
+            "sections": [],
+        }
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 1
     secs = split_sections(draft)
     numbered = [(t, b) for t, b in secs if t != "__lead__" and re.match(r"^[一二三四五六七八九十]、", t)]
     if len(numbered) < args.min_sections:

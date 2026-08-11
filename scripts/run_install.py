@@ -126,7 +126,7 @@ def main() -> int:
     # v3.4：思维链 + 内容禁表（灵魂层）
     code_m, out_m = run(
         "extract_mind_and_bans.py",
-        ["--persona", str(persona), *(["--llm"] if args.calibrate else [])],
+        ["--persona", str(persona)],
     )
     if code_m != 0:
         print(json.dumps({"ok": False, "error": "extract_mind_and_bans failed", "log": out_m[-1500:]}, ensure_ascii=False))

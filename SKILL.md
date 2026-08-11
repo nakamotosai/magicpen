@@ -33,7 +33,7 @@ description: "神笔 / magicpen：可安装文风产线+人格包。Install(原�
 2. 要第二份范文 = **新会话 / 新人格**，禁止双框并存。  
 3. 高级：只生成 SPAWN 外置跑，仍落同一 raw。  
 
-密钥：`CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY`；基址 `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE`（默认 `http://127.0.0.1:8317`）。
+密钥：`CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_AUTH_TOKEN`；基址 `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL`（默认 `http://127.0.0.1:8317`）。模型 `MAGICPEN_LLM_MODEL`（默认 grok-4.5）；超时 `MAGICPEN_LLM_TIMEOUT`（默认 300s）；推理档 `MAGICPEN_LLM_REASONING`（如 `high`，可选）。
 
 ```bash
 pythonw scripts/run_install.py --raw RAW.md --id laocai [--calibrate]

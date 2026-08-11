@@ -146,9 +146,9 @@ The repo ships **three** ready-to-use persona packs under `examples/`. After see
 
 | local id | display | sample | path |
 |----------|---------|--------|------|
-| `laocai` | 老蔡 | colloquial blank-line fingerprint | `examples/persona-laocai/` |
+| `laocai` | 老蔡 | colloquial blank-line fingerprint | `examples/persona-laocai/persona-laocai/` |
 | `luxun` | 鲁迅 · 藤野先生 (*Mr. Fujino*) | 《藤野先生》(public domain) | `examples/persona-luxun/` |
-| `soseki` | 夏目漱石·我是猫肌理 | long-paragraph dry sarcasm | `examples/soseki-wagahai/` |
+| `soseki` | 夏目漱石·我是猫肌理 | long-paragraph dry sarcasm | `examples/soseki-wagahai/personas/persona-soseki-wagahai/` |
 
 ```bash
 # one-shot seed into ~/.omp/magicpen/personas/ (skips if present; --force overwrites samples, keeps runs)

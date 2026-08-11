@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -33,6 +34,25 @@ def main() -> int:
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parent
+
+    # 空/缺 draft 直接硬失败（防四闸空串兜底全绿）
+    han_draft = 0
+    if args.draft.exists():
+        t = args.draft.read_text(encoding="utf-8", errors="replace")
+        han_draft = len(re.findall(r"[一-鿿]", t))
+    if han_draft < 1:
+        report = {
+            "ok": False,
+            "gates": [],
+            "error": "draft_empty_or_missing",
+            "draft_han": han_draft,
+            "note": "draft 无正文，机检不适用，禁止空稿放行",
+        }
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 1
+
     gates = []
 
     # identity

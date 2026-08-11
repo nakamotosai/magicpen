@@ -13,6 +13,10 @@ console/runs/
 console/**/state.json
 console/**/*.bak
 
+# probe / scratch scripts (never ship; may embed keys)
+scripts/_*.py
+scripts/_*.md
+
 # demo run artifacts (local smoke; not product path)
 examples/**/runs/
 
