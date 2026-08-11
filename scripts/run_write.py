@@ -111,7 +111,8 @@ def stage_prepare(persona: Path, brief: Path, run_id: str, max_loops: int) -> di
         "next": "Spawn Writer with SPAWN_PROMPT.md → then --stage post",
         "spawn_instruction": (
             "读 SPAWN_PROMPT.md（或 AGENT_HANDOFF.json.spawn_prompt）整段注入 Writer 分身；"
-            "分身只写 draft.md；主控/console 禁代写正文。"
+            "三路径等价：① 主控亲写 / ② 拉分身写 / ③ 脚本直连模型写 draft.md 均合法；"
+            "禁的是绕过 WRITE_PROMPT 合同另写一套文风提示（注入词 = SPAWN_PROMPT 是唯一 SSOT）。"
         ),
     }
 
