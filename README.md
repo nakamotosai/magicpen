@@ -134,7 +134,7 @@ In-page drafting / scoring / sample search use OpenAI-compatible `chat/completio
 |----------|------|
 | `CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY` | API key (required) |
 | `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL` | Base URL (default `http://127.0.0.1:8317`) |
-| `MAGICPEN_LLM_MODEL` | Model (default `grok-4.5`) |
+| `MAGICPEN_LLM_MODEL` | Model (example `grok-4.5`; must set via env — no default) |
 
 Keys are read-only env vars, never written into the repo.
 

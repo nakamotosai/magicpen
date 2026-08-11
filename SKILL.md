@@ -29,11 +29,11 @@ description: "神笔 / magicpen：可安装文风产线+人格包。Install(原�
 
 范文（I1）**每个会话/人格只有一份** `raw.md`：
 
-1. **自己贴文** 或 **一键网搜**（`run_sample_search_llm` + cliproxy grok-4.5）——只是填入方式不同，**结果都写入同一 raw**；新搜/新贴 = **覆盖**。  
+1. **自己贴文** 或 **一键网搜**（`run_sample_search_llm` + 任意 OpenAI 兼容端点）——只是填入方式不同，**结果都写入同一 raw**；新搜/新贴 = **覆盖**。
 2. 要第二份范文 = **新会话 / 新人格**，禁止双框并存。  
 3. 高级：只生成 SPAWN 外置跑，仍落同一 raw。  
 
-密钥：`CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_AUTH_TOKEN`；基址 `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL`（默认 `http://127.0.0.1:8317`）。模型 `MAGICPEN_LLM_MODEL`（默认 grok-4.5）；超时 `MAGICPEN_LLM_TIMEOUT`（默认 300s）；推理档 `MAGICPEN_LLM_REASONING`（如 `high`，可选）。
+密钥：`CLIPROXYAPI_API_KEY` / `MAGICPEN_LLM_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_AUTH_TOKEN`；基址 `MAGICPEN_LLM_BASE` / `CLIPROXY_BASE` / `OPENAI_BASE_URL`（示例 `http://127.0.0.1:8317`）。模型 `MAGICPEN_LLM_MODEL`（示例 `grok-4.5`，无默认——须 env 显式指定）；超时 `MAGICPEN_LLM_TIMEOUT`（默认 300s）；推理档 `MAGICPEN_LLM_REASONING`（如 `high`，可选）。上述仅③号路径需要；①②号主控/分身路径不依赖。
 
 ```bash
 pythonw scripts/run_install.py --raw RAW.md --id laocai [--calibrate]
@@ -61,26 +61,36 @@ Kill：`pythonw scripts/assert_soul_v34.py` exit0。
 
 ### 写稿 · 人格包 + 要求 → 稿 + 回执（内部：Write / `run_write`）
 
-写稿产线（控制台默认 **页内 Grok**；skill 会话可选外置分身）：
+写稿产线，**三种写 draft 正文的方式等价，任选其一**：
 
 ```bash
+# ① 主控亲写：读 SPAWN_PROMPT 后主控本人写 draft.md（轻量任务首选，无须任何模型）
 pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage prepare
-# → WRITE_PROMPT + SPAWN_PROMPT.md + AGENT_HANDOFF.json
-# 默认一键写（与控制台 W3 同合同）：
+#   → 产出 WRITE_PROMPT + SPAWN_PROMPT.md + AGENT_HANDOFF.json
+#   主控读 SPAWN_PROMPT，自己写 draft.md 到 runs/rN/draft.md，再跑 post/finalize
+
+# ② 主控拉分身写：派 omp task 分身把 SPAWN_PROMPT 整段注入，产出 draft.md
+pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage prepare
+#   → 产 SPAWN_PROMPT 后用 agent() 起分身写 draft.md（不依赖 cliproxy/外部模型脚本）
+
+# ③ 脚本直连模型写：cliproxy 或任意 OpenAI 兼容端点
 pythonw scripts/run_writer_llm.py --run-dir ~/.omp/magicpen/personas/laocai/runs/rN
-# → cliproxy grok-4.5 写 draft.md（密钥 CLIPROXYAPI_API_KEY）
-# 高级：外置 Writer 分身仍可整段注入 SPAWN_PROMPT
+#   → 经 cliproxy_chat.py 写 draft.md（密钥/模型/基址全走 env，见下）
+
+# 三种方式后续相同：
 pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage post --run-id rN
 pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage finalize --run-id rN
 ```
 
-**注入 SSOT：** `scripts/build_agent_handoff.py`。  
-页内 LLM 与外置分身 **同一 WRITE_PROMPT 合同**；禁网页另写一套文风提示。
+**三种方式产出同一 draft.md + RECEIPT 等价**；选择由当前会话条件决定——
+无外部模型/无密钥 → ①或②；有 cliproxy 端点 → ③。**不预设哪条是默认**。
+
+**注入 SSOT：** `scripts/build_agent_handoff.py`。三路径同一 WRITE_PROMPT 合同；禁另写一套文风提示。
 
 **交付物（缺一不可）：** `draft.md` + `RECEIPT.md` + `RECEIPT.json`。  
 `deliver_ok=false` 也要出回执。
 
-**只跑机器硬闸**（CLI：`--gates-only`，须用户**明文**/界面勾选）：仍跑身份污染 + brief 机检，**跳过评分分身**；RECEIPT 标注降级。适合先通流程，不当正式交稿默认。
+**只跑机器硬闸**（CLI：`--gates-only`，须用户**明文**/界面勾选）：仍跑身份污染 + brief 机检，**跳过评分**；RECEIPT 标注降级。适合先通流程，不当正式交稿默认。
 
 ## 字数（样本）
 
@@ -129,7 +139,7 @@ pythonw server.py
 | I2 | 可改槽位 + 抽指纹 | **默认新 id**；覆盖须显式勾选。再 `run_install` |
 | I3–I5 | 校准 / 体检 / 入库 | `run_install`（可 --calibrate） |
 | W2 | 组装提示 | `run_write --stage prepare` → WRITE_PROMPT + SPAWN（高级外置用） |
-| W3 | 写正文 | **默认** `run_writer_llm`（cliproxy grok-4.5 写 draft）；高级才复制 SPAWN 外置 |
+| W3 | 写正文 | 三路径等价：① 主控亲写 draft ② 拉分身写 ③ `run_writer_llm`（脚本直连模型）；控制台走③，skill 会话①或②均可 |
 | W4 | 机器硬闸 | `run_write --stage post` → SPAWN_PROMPT(judge) 或 `--gates-only` |
 | W5 | 评分 | **默认** `run_judge_llm`；勾「只跑机器硬闸」跳过 |
 | W6 | 回执交付 | `run_write --stage finalize` → RECEIPT；成功时**自动拷一份到桌面** |
@@ -139,8 +149,8 @@ pythonw server.py
 ## 主控纪律
 
 1. 禁止手拼 10+ 裸命令冒充产线；走 `run_install` / `run_write`（或控制台点步）。  
-2. **禁止主控/控制台手写 draft 冒充 Writer**；写作只交给分身，注入词 = SPAWN_PROMPT。  
-3. 默认必须：写后机检 → Judge → dual_axis；身份失败不可交付。  
+2. 三路径等价，禁止冒充：主控亲写/拉分身写/脚本直连模型写三种方式产 draft.md 均合法；禁止的是**绕过 WRITE_PROMPT 合同**另写一套文风提示（注入词 = SPAWN_PROMPT 是唯一 SSOT）。
+3. 默认必须：写后机检 → Judge → dual_axis；身份失败不可交付。
 4. 一人一包；`hygiene` keep-runs 默认 1。  
 5. 编排细节：`references/auto-pipeline.md`；隔离：`references/isolation-loop.md`。  
 6. 改 console 或 handoff 脚本须两端同改，禁只改网页词。
@@ -153,9 +163,9 @@ pythonw server.py
 | **run_write.py** | Write 入口（prepare/post/finalize） |
 | **build_agent_handoff.py** | Writer/Judge/**sample_search** SPAWN_PROMPT SSOT |
 | clean_sample_text.py | 范文清洗（去壳/压空行） |
-| cliproxy_chat.py | 经 cliproxy 调 chat/completions（默认 grok-4.5） |
-| run_sample_search_llm.py | I1 一键：SPAWN→Grok→清洗 |
-| **run_writer_llm.py** | W3 一键：WRITE_PROMPT→Grok→draft |
+| cliproxy_chat.py | 经任意 OpenAI 兼容端点调 chat/completions（路径③用） |
+| run_sample_search_llm.py | I1 一键：SPAWN→模型→清洗（路径③） |
+| **run_writer_llm.py** | W3 路径③：经 cliproxy_chat 写 draft.md |
 | build_receipt.py | RECEIPT |
 | style_sensors / cut_train_window / quality_check | 工厂 |
 | build_write_prompt / build_judge_prompt | 提示组装 |

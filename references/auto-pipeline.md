@@ -9,7 +9,7 @@
 | 用户话 | 命令 | 作用 |
 |---|---|---|
 | 创建人格 | `run_install.py --raw --id [--calibrate]` | 原文→`~/.omp/magicpen/personas/<id>` |
-| 贴/搜范文 | 手贴 raw；或 `run_sample_search_llm.py`（SPAWN+cliproxy grok-4.5+清洗）；高级 `build_agent_handoff --role sample_search` | I1 样本进会话 `raw.md` |
+| 贴/搜范文 | 手贴 raw；或 `run_sample_search_llm.py`（SPAWN+模型+清洗）；高级 `build_agent_handoff --role sample_search` | I1 样本进会话 `raw.md` |
 | 写稿 | `run_write.py --persona --brief --stage prepare\|post\|finalize` | 写稿编排 + 闸 + RECEIPT |
 | （内） | `build_agent_handoff.py --role writer\|judge\|sample_search` | 分身注入包 SSOT |
 
@@ -17,11 +17,12 @@
 
 ```
 prepare  → WRITE_PROMPT + SPAWN_PROMPT(writer) + AGENT_HANDOFF
-           【默认】run_writer_llm（cliproxy grok-4.5）→ draft.md
-           【高级】整段 SPAWN 外置 Writer 分身
+           【三路径等价，任选其一】
+           ① 主控亲写 draft.md（读 SPAWN_PROMPT 后本人写）
+           ② 拉分身写（omp task 分身把 SPAWN_PROMPT 注入产 draft）
+           ③ run_writer_llm 经 cliproxy_chat 写 draft（控制台默认走此）
 post     → GATES + JUDGE_PROMPT + SPAWN_PROMPT(judge)  或「只跑机器硬闸」合成
-           【停】整段 SPAWN → Judge 或跳过
-finalize → dual_axis + RECEIPT + loop + hygiene     【交稿】
+           整段 SPAWN → Judge 或跳过
 ```
 
 页内 LLM 与外置分身 **同一 WRITE_PROMPT**；禁网页另写文风提示。  
@@ -41,8 +42,7 @@ run 目录：
 ## 角色
 
 | 角色 | 做 | 禁 |
-|---|---|---|
-| Orchestrator（主控或 console） | 调 facade、派分身、读 RECEIPT | 代写 draft |
+| Orchestrator（主控或 console） | 调 facade、派分身、读 RECEIPT；路径①下可亲写 draft | 绕过 WRITE_PROMPT 合同另写文风 |
 | Writer | 只吃 SPAWN_PROMPT → draft.md | 改 persona；残缺提示 |
 | Judge | 只吃 SPAWN_PROMPT → JUDGE_SCORE.json | 改 draft；只报硬分 |
 | Gates | identity / brief / hard / dual_axis / loop | 改文风 |

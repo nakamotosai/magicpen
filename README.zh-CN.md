@@ -134,7 +134,7 @@ W3/W5 默认页内 LLM；W6 出回执成功时**自动拷一份正文到桌面**
 |------|------|
 | `CLIPROXYAPI_API_KEY` 或 `MAGICPEN_LLM_KEY` 或 `OPENAI_API_KEY` | 密钥（必填） |
 | `MAGICPEN_LLM_BASE` 或 `CLIPROXY_BASE` 或 `OPENAI_BASE_URL` | 基址，默认 `http://127.0.0.1:8317` |
-| `MAGICPEN_LLM_MODEL` | 模型，默认 `grok-4.5` |
+| `MAGICPEN_LLM_MODEL` | 模型（示例 `grok-4.5`；须 env 显式指定，无默认） |
 
 密钥只读环境变量，不写进仓库。
 

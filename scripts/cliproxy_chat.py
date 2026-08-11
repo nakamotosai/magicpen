@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""薄封装：经 cliproxyapi 调 chat/completions（默认 grok-4.5）。
+"""薄封装：经任意 OpenAI 兼容端点调 chat/completions（模型须 env 指定，无默认）。
 
 密钥只读环境变量，不落盘、不进日志全文：
   CLIPROXYAPI_API_KEY / OPENAI_API_KEY / MAGICPEN_LLM_KEY
-  MAGICPEN_LLM_BASE / CLIPROXY_BASE / OPENAI_BASE_URL（默认 http://127.0.0.1:8317）
-  MAGICPEN_LLM_MODEL（默认 grok-4.5）
+  MAGICPEN_LLM_BASE / CLIPROXY_BASE / OPENAI_BASE_URL（示例 http://127.0.0.1:8317）
+  MAGICPEN_LLM_MODEL（须 env 显式指定，无默认；示例 grok-4.5）
 
   pythonw cliproxy_chat.py --prompt SPAWN.md --out raw.md
 """
@@ -22,7 +22,7 @@ from pathlib import Path
 
 # 公开默认：本机 OpenAI 兼容口；私有网关请用环境变量覆盖
 DEFAULT_BASE = "http://127.0.0.1:8317"
-DEFAULT_MODEL = "grok-4.5"
+DEFAULT_MODEL = ""  # 不设默认模型；须 env MAGICPEN_LLM_MODEL 显式指定（示例 grok-4.5），强制走路径③者意识到自己在选模型
 
 
 def resolve_base() -> str:
@@ -61,9 +61,14 @@ def chat_completions(
             "缺少 LLM 密钥：请设环境变量 CLIPROXYAPI_API_KEY（或 MAGICPEN_LLM_KEY）"
         )
     timeout = timeout or int(os.environ.get("MAGICPEN_LLM_TIMEOUT") or 300)
+    chosen_model = model or os.environ.get("MAGICPEN_LLM_MODEL") or DEFAULT_MODEL
+    if not chosen_model:
+        raise RuntimeError(
+            "缺少模型名：请设环境变量 MAGICPEN_LLM_MODEL（路径③须显式选模型，不再隐式默认 grok-4.5）"
+        )
     url = base + ("/chat/completions" if base.endswith("/v1") else "/v1/chat/completions")
     body = {
-        "model": model or os.environ.get("MAGICPEN_LLM_MODEL") or DEFAULT_MODEL,
+        "model": chosen_model,
         "messages": messages,
         "temperature": temperature,
         "max_tokens": max_tokens,

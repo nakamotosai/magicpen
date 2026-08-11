@@ -134,7 +134,7 @@ W3/W5 は既定でページ内 LLM；W6 でレシート成功時は本文の**�
 |------|------|
 | `CLIPROXYAPI_API_KEY` か `MAGICPEN_LLM_KEY` か `OPENAI_API_KEY` | API キー（必須） |
 | `MAGICPEN_LLM_BASE` か `CLIPROXY_BASE` か `OPENAI_BASE_URL` | ベース URL（既定 `http://127.0.0.1:8317`） |
-| `MAGICPEN_LLM_MODEL` | モデル（既定 `grok-4.5`） |
+| `MAGICPEN_LLM_MODEL` | モデル（例 `grok-4.5`；env で明示指定必須、既定なし） |
 
 キーは読み取り専用の環境変数であり、リポジトリに書き込まない。
 

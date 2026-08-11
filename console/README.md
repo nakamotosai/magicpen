@@ -2,7 +2,7 @@
 
 本机网页步进操作 **创建人格 / 写稿**（内部仍是 Install / Write facade）。  
 与 skill 本体 **同一套 facade + 同一套 SPAWN_PROMPT**。  
-不新造仿写算法；**不代替 Writer/Judge 分身写正文**。
+不新造仿写算法；**写 draft 有三路径等价**：①主控亲写 ②拉分身写 ③脚本直连模型（`run_writer_llm`）；控制台走③。
 
 界面词：**创建人格**（不要写「装笔」）→ **写稿**。  
 「只跑机器硬闸」= CLI `--gates-only`：跳过评分分身，回执标降级。
@@ -22,12 +22,12 @@ http://127.0.0.1:18766/
 
 | 控制台 | 用户可见 | skill / 脚本 | 分身 |
 |---|---|---|---|
-| I1 | 贴范文 / 一键网搜 | 手贴；或 `run_sample_search_llm`（cliproxy grok-4.5 写 raw+清洗） | 默认网页内直连模型；高级才外置 SPAWN |
+| I1 | 贴范文 / 一键网搜 | 手贴；或 `run_sample_search_llm`（模型写 raw+清洗） | 控制台直连模型；skill 会话①②路径不依赖 |
 | I2–I5 | 创建人格后续 | `run_install` | 无（工厂脚本） |
-| W2 | 组装提示 | `run_write --stage prepare` | 产出 WRITE_PROMPT（+高级 SPAWN） |
-| W3 | 写正文 | **默认** `run_writer_llm`（cliproxy grok-4.5） | 写 `draft.md`；高级才外置 SPAWN |
+| W2 | 组装提示 | `run_write --stage prepare` | 产出 WRITE_PROMPT + SPAWN（注入词 SSOT） |
+| W3 | 写正文 | 三路径等价：①主控亲写 ②拉分身写 ③`run_writer_llm`（脚本直连模型） | 控制台走③；skill 会话①或②不依赖外部端点 |
 | W4 | 机器硬闸 | `run_write --stage post` | 产出 Judge 注入词；或「只跑机器硬闸」 |
-| W5 | 评分 | **默认** `run_judge_llm`（cliproxy grok） | 人话成绩单给用户看；`JUDGE_SCORE.json` 给机器出回执；高级才露 JSON |
+| W5 | 评分 | `run_judge_llm`（脚本路径）或分身写 JUDGE_SCORE | 人话成绩单给用户看；`JUDGE_SCORE.json` 给机器出回执 |
 | W6 | 回执交付 | `run_write --stage finalize` | 出回执并**自动拷一份正文到桌面**；不再依赖打开文件夹 |
 
 注入词 SSOT：`scripts/build_agent_handoff.py`（skill 与 console 共用）。
@@ -38,7 +38,7 @@ http://127.0.0.1:18766/
 2. 正文区上方 **历史条**：切换 run · 打开 · 全新写 · 从本步清 · 全部清（只动本会话进度，磁盘 run 默认保留）。  
 3. W1 写要求 → 保存 → 下一步  
 4. W2 **组装提示**  
-5. W3 **一键写正文（Grok）** → 可改 → 下一步  
+5. W3 **一键写正文**（控制台走③脚本路径）→ 可改 → 下一步  
 6. W4 硬闸 → W5 **一键评分** → 出回执时正文**自动放到桌面**（库内 runs 仍保留）  
 
 
