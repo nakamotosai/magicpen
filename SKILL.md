@@ -115,7 +115,7 @@ pythonw scripts/run_write.py --persona laocai --brief BRIEF.md --stage finalize 
   runs/rN/ draft RECEIPT GATES JUDGE_* …
 ```
 
-skill 内 `examples/` 仅 demo（≤3：`laocai` / `luxun`《藤野先生》/ `soseki`）。  
+skill 内 `examples/` 仅 demo（`laocai` / `luxun`《藤野先生》/ `soseki` / `zhuziqing`《背影》/ `hushi`《差不多先生传》）。  
 `pythonw scripts/seed_demos.py` 装进 `~/.omp/magicpen/personas/` 后可直接 `--persona luxun` 写稿。  
 研究堆在 `archive/`，**不进默认路径**。
 
