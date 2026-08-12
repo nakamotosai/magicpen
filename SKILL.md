@@ -39,7 +39,7 @@ description: "神笔 / magicpen：可安装文风产线+人格包。Install(原�
 pythonw scripts/run_install.py --raw RAW.md --id laocai [--calibrate]
 ```
 
-产物：`~/.omp/magicpen/personas/<id>/` 下 `sample.md` `rules.md` `metrics.json` `persona.json` + **v3.4** `mind.md` `content_ban.txt`。
+产物：`~/.omp/magicpen/personas/<id>/` 下 `sample.md` `rules.md` `metrics.json` `persona.json` + **v3.4** `mind.md` `content_ban.txt` + **可选** `style_fingerprint.json`（LLM 深度文风分析，10 维指纹，`analyze_style.py` 生成）。
 
 ### v3.4/v3.5 灵魂层（机检绿 ≠ 像）
 
@@ -172,6 +172,7 @@ pythonw server.py
 | post_write_gates / dual_axis_gate / loop_state | 闸与回环 |
 | assert_identity_bleed / assert_content_bleed / check_brief_compliance | 硬检 |
 | extract_mind_and_bans | Install 抽 mind+content_ban |
+| **analyze_style** | LLM 深度文风分析 → style_fingerprint.json + 改进版 mind.md |
 | hygiene_persona / persona_lib | 库与卫生 |
 | assert_magicpen_no_legacy / **assert_soul_v34** | Kill 旧名 / 灵魂层接线 |
 
