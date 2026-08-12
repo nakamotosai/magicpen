@@ -30,7 +30,8 @@ holdouts/
 *.swp
 *~
 
-# accidental secrets
+# test / scratch
+test-clone/
 .env
 .env.*
 !.env.example

@@ -135,6 +135,70 @@ def metrics_param_block(persona: Path) -> str:
     return "\n".join(lines)
 
 
+def style_fingerprint_block(persona: Path) -> str:
+    """把 style_fingerprint.json（LLM 深度文风分析）压成可读文风指纹段。
+
+    优先用指纹；缺失时回退到「（无指纹；仍按 mind+rules+sample 笔迹）」。
+    """
+    fp = persona / "style_fingerprint.json"
+    if not fp.exists():
+        return ""
+    try:
+        data = json.loads(fp.read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    sf = data.get("style_fingerprint", {})
+    if not sf:
+        return ""
+    lines = []
+    author = data.get("author", "")
+    if author:
+        lines.append(f"> 识别作者：{author}\n")
+    # 前 3 关键规则
+    top = data.get("top_3_most_important_rules", [])
+    if top:
+        lines.append("**最关键的三条**（必须做到）：")
+        for i, r in enumerate(top, 1):
+            lines.append(f"{i}. {r}")
+        lines.append("")
+    # 各维度
+    dim_labels = {
+        "irony_and_satire": "反讽与讽刺机制",
+        "sentence_architecture": "句式结构与节奏",
+        "vocabulary_signature": "词汇指纹",
+        "argumentation_method": "论证与说理方式",
+        "narrative_stance": "叙事视角与距离",
+        "opening_patterns": "开头模式",
+        "closing_patterns": "结尾模式",
+        "rhetorical_device_repertoire": "修辞手法库",
+        "emotional_expression": "情感表达与克制",
+        "period_flavor": "时代语感与文体特征",
+    }
+    for key, label in dim_labels.items():
+        dim = sf.get(key)
+        if not dim:
+            continue
+        core = dim.get("core", "")
+        rules = dim.get("rules", [])
+        donts = dim.get("donts", [])
+        if core:
+            lines.append(f"### {label}\n")
+            lines.append(f"- 核心：{core}")
+        for r in rules[:4]:
+            lines.append(f"- 规则：{r}")
+        for d in donts[:2]:
+            lines.append(f"- 禁止：{d}")
+        lines.append("")
+    # must_avoid
+    avoid = data.get("must_avoid_at_all_costs", [])
+    if avoid:
+        lines.append("**绝对不要做**：")
+        for i, a in enumerate(avoid, 1):
+            lines.append(f"{i}. {a}")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def build(
     persona: Path,
     brief: str,
@@ -161,7 +225,8 @@ def build(
     parts.append(f"# 神笔 · Writer 提示词 v3.4（人格包 `{pid}` · {mode}）\n\n")
     parts.append(
         "你是写稿分身。任务：用这个人的**脑子推进方式 + 笔迹参数**写【新文任务】。\n"
-        "不是润色 brief，不是摘要原文，不是复读样本故事，不是通用「鲁迅式政论」。\n\n"
+        "不是润色 brief，不是摘要原文，不是复读样本故事，不是通用政论骨架。\n"
+        "style_fingerprint.json（若有）为最高优先——覆盖一切通用假设。\n\n"
     )
     parts.append("## 0. 铁律（P0）\n\n")
     if no_sample:
@@ -195,6 +260,13 @@ def build(
             "（人格包无 mind.md）仍须：刺激→查证/场面→反差→判断→短收束；"
             "禁止开篇就升华。\n"
         )
+
+    # 2. 文风指纹（LLM 深度分析，若有则覆盖通用假设）
+    fp_block = style_fingerprint_block(persona)
+    if fp_block:
+        parts.append("\n## 1b. 文风指纹（LLM 深度分析 · **最高优先**）\n\n")
+        parts.append(fp_block)
+        parts.append("\n")
 
     parts.append("\n## 2. 写作要领 rules（加权 · 从原文提炼）\n\n")
     parts.append(rules)
