@@ -8,21 +8,16 @@ Thumbs.db
 .venv/
 venv/
 
-# console session garbage (never ship)
-console/runs/
-console/**/state.json
-console/**/*.bak
-
-# probe / scratch scripts (never ship; may embed keys)
-scripts/_*.py
-scripts/_*.md
-
-# demo run artifacts (local smoke; not product path)
-examples/**/runs/
+# local run artifacts (never ship)
+out/
+runs/
 
 # research dumps (local only; not product path)
 archive/
 holdouts/
+
+# private training corpus (never enters public repo)
+corpus/
 
 # editor / OS
 .idea/
@@ -30,8 +25,7 @@ holdouts/
 *.swp
 *~
 
-# test / scratch
-test-clone/
+# accidental secrets
 .env
 .env.*
 !.env.example
